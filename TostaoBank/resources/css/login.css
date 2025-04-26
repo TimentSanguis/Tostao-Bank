@@ -1,0 +1,264 @@
+/*Cores Principais do Site:
+Cor de Fundo: #0F0840 ou rgb(15, 8, 64)
+Cor Secundária: #170C59 ou rgb(23, 12, 89)
+Cor Terciaria ou de uva: #552F72 ou rgb(85, 47, 114)
+Quarta Cor, parecida com a secundária só que mais claro: #2B178B ou rgb(43, 23, 139)
+Branco encardido: #EEEFEE ou rgb(238, 239, 238) 
+*/
+*{
+	margin: 0;
+	padding: 0;
+}
+:root {
+	--color-white: #EEEFEE;
+	--color-AzulEscuro: #0F0840;
+	--color-Azul: #170C59;
+	--color-Roxo: #552F72;
+	--color-AzulRoxo: #2B178B;
+}
+
+body{
+    background:#262626;
+    background-image: url('../files/pics/fundo_web.png');
+    background-size: cover;
+    background-repeat: no-repeat;
+    animation: fade-in 0.5s ease;
+}
+
+textoG{
+	font-size: 40px;
+    text-align: center;
+    font-family: cursive;
+    color: var(--color-white);
+    font-family: "Sora", sans-serif;
+    font-weight: 100;
+    font-style: normal;
+	text-shadow: var(--color-white) 0px 0px 7px;
+
+}
+
+h1 {
+    font-size: 25px;
+    text-align: center;
+    font-family: cursive;
+    color: var(--color-white);
+    font-family: "Sora", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 100;
+    font-style: normal;
+}
+
+p {
+    text-align: center;
+    margin-top: 13%;
+    font-size: 20px;
+    color:rgb(85, 47, 114);
+}
+
+a {
+    text-decoration: none;
+    color:  rgb(15, 8, 64);
+    font-family: "Sora", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 150;
+    font-style: normal;
+}
+
+a:hover {
+    color: rgb(85, 47, 114);
+}
+
+a:active {
+    color: white
+}
+
+button {
+    background-color:rgb(23, 12, 89);
+    display: block;
+    margin: 0 auto;
+    cursor: pointer;
+    width: 300px;
+    height: 100px;
+    border-radius: 50px;
+    color: rgb(238, 239, 238);
+    font-size: 35px;
+    text-decoration: none;
+    border-color: rgb(15, 8, 64);
+    transition: background-color 0.3s ease;
+    font-family: "Sora", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 150;
+    font-style: normal;
+    transition: transform 0.2s ease; /* Transição suave */
+}
+
+button:hover {
+    background-color: rgb(85, 47, 114);
+    transform: translateY(-5px); /* Efeito de elevação ao passar o mouse */
+}
+
+.header, .headerNav {
+	display:flex;
+	flex-direction:row;
+	align-items:center;
+}
+
+.header {
+	box-shadow: 1px 1px 10px var(--color-Roxo);
+	background: linear-gradient(to bottom right,var(--color-AzulEscuro), var(--color-AzulRoxo));
+	color: var(--color-white);
+	min-height:80px;
+	justify-content: space-between;
+	padding: 0 5%;
+	font-size: 20px;
+	font-family: cursive;
+	color: var(--color-white);
+	font-family: "Sora", sans-serif;
+	font-optical-sizing: auto;
+	font-weight: 100;
+	font-style: normal;
+}
+
+.headerNav{
+	gap: 48px;
+	z-index:2;
+}
+
+.headerNav a{
+	text-decoration: none;
+	color: var(--color-white);
+	transition:1s;
+}
+
+.headerNav a:hover {
+	color:var(--color-Roxo);
+	transform: translateY(-5px);
+}
+.centro {
+	border-radius: 10px;
+	box-shadow: 1px 1px 10px var(--color-Roxo);
+	background: linear-gradient(to top,var(--color-AzulEscuro), var(--color-AzulRoxo));
+	color: var(--color-white);
+	border: solid 5px;
+	border-color: black;
+	display:flex;
+	width: 600px;
+	height: 500px;
+	justify-content: center;
+	align-items: center;
+	margin:auto;
+	}
+	
+.btn_icon_header{
+	background-color:transparent;
+	border:none;
+	color:white;
+	cursor:pointer;
+	display:none;
+}
+
+.ativo{
+	background-color: var(--color-AzulEscuro);
+	padding: 10px;
+	border-radius: 10px;
+}
+
+.jumento{
+    color: rgb(178, 111, 230);
+    text-decoration: none;
+    text-align: center;
+    font-size: 20px;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    transition: transform 0.2s ease; /* Transição suave */
+}
+
+.jumento:hover {
+    color: rgb(202, 158, 236);
+    transform: translateY(-5px); /* Efeito de elevação ao passar o mouse */
+}
+
+.jumento:active{
+    color: rgb(255, 255, 255);
+}
+
+#campos_login{
+    text-align: center;
+    padding: 10px;
+}
+
+#usuario,#senha {
+    width: 350px;
+    height: 30px;
+    border-radius: 300px;
+    font-size: 25px;
+    background-color: rgb(15, 8, 64);
+    color: rgb(238, 239, 238);
+    border-width: 3px;
+    border-color: blueviolet;
+    transition: transform 0.2s ease; /* Transição suave */
+	padding:  5px 20px;
+    font-family: cursive;
+    color: var(--color-white);
+    font-family: "Sora", sans-serif;
+    font-weight: 100;
+    font-style: normal;
+}
+
+#usuario:hover,#senha:hover {
+    transform: translateY(-5px); /* Efeito de elevação ao passar o mouse */
+}
+
+#usuario:active,#senha:active {
+    color: rgb(238, 239, 238);
+    background-color: rgb(178, 111, 230);
+}
+
+#toggleSenha{
+    width: 250px;
+    height: 50px;
+    cursor: pointer;
+    font-size: 20px;
+    text-align: center;
+    font-family: cursive;
+    color: var(--color-white);
+    font-family: "Sora", sans-serif;
+    font-weight: 100;
+    font-style: normal;
+}
+
+.sora-uniquifier {
+    font-family: "Sora", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 150;
+    font-style: normal;
+}
+
+/* Animação de fade-in */
+@keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@media screen and (max-width: 700px){
+	.btn_icon_header{
+		display:block;
+	}
+	.headerNav{
+		position:absolute;
+		flex-direction:column;
+		top:0;
+		background-color: gray;
+		height:100%;
+		width:35vw;
+		padding:16px;
+		animation-duration:1s;
+		margin-left:-100vw;
+	}
+}
+
+@keyframes showSideBar{
+	from {margin-left:-100vw};
+	top {margi-left: -10vw};
+}

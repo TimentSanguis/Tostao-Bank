@@ -1,0 +1,292 @@
+@import url("https://fonts.googleapis.com/css2?family=Sora:wght@100..800&family=Urbanist:ital,wght@0,100..900;1,100..900&display=swap");
+html,
+body,
+div,
+span,
+applet,
+object,
+iframe,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+blockquote,
+pre,
+a,
+abbr,
+acronym,
+address,
+big,
+cite,
+code,
+del,
+dfn,
+em,
+img,
+ins,
+kbd,
+q,
+s,
+samp,
+small,
+strike,
+strong,
+sub,
+sup,
+tt,
+var,
+b,
+u,
+i,
+center,
+dl,
+dt,
+dd,
+ol,
+ul,
+li,
+fieldset,
+form,
+label,
+legend,
+table,
+caption,
+tbody,
+tfoot,
+thead,
+tr,
+th,
+td,
+article,
+aside,
+canvas,
+details,
+embed,
+figure,
+figcaption,
+footer,
+header,
+hgroup,
+menu,
+nav,
+output,
+ruby,
+section,
+summary,
+time,
+mark,
+audio,
+video {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 100%;
+  font: inherit;
+  vertical-align: baseline;
+}
+:root {
+	--color-white: #EEEFEE;
+	--color-AzulEscuro: #0F0840;
+	--color-Azul: #170C59;
+	--color-Roxo: #552F72;
+	--color-AzulRoxo: #2B178B;
+}
+
+*{
+	margin: 0;
+	padding: 0;
+}
+
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+body{
+	font-family: "Sora", sans-serif;
+	background-color:var(--color-AzulEscuro);
+	color:black;
+}
+
+textoG{
+	font-size: 40px;
+    text-align: center;
+    font-family: cursive;
+    color: var(--color-white);
+    font-family: "Sora", sans-serif;
+    font-weight: 100;
+    font-style: normal;	
+	text-shadow: var(--color-white) 0px 0px 7px;
+}
+
+textoM{
+	font-size: 40px;
+    text-align: center;
+    font-family: cursive;
+    color: var(--color-white);
+    font-family: "Sora", sans-serif;
+    font-weight: 100;
+    font-style: normal;
+}
+
+h1, h2 {
+    font-size: 25px;
+    text-align: center;
+    font-family: cursive;
+    color: var(--color-white);
+    font-family: "Sora", sans-serif;
+    font-weight: 100;
+    font-style: normal;
+}
+
+.header, .headerNav {
+	display:flex;
+	flex-direction:row;
+	align-items:center;
+}
+
+.header {
+	box-shadow: 1px 1px 10px var(--color-Roxo);
+	background: linear-gradient(to bottom right,var(--color-AzulEscuro), var(--color-AzulRoxo));
+	color: var(--color-white);
+	min-height:80px;
+	justify-content: space-between;
+	padding: 0 5%;
+	font-size: 20px;
+	font-family: cursive;
+	color: var(--color-white);
+	font-family: "Sora", sans-serif;
+	font-weight: 100;
+	font-style: normal;
+}
+
+.headerNav{
+	gap: 48px;
+	z-index:2;
+}
+
+.headerNav a{
+	text-decoration: none;
+	color: var(--color-white);
+	transition:1s;
+	font-weight: bold;
+}
+
+.headerNav a:hover {
+	color:var(--color-Roxo);
+}
+
+.header2{
+	background: var(--color-Azul);
+	color: var(--color-white);
+	min-height:80px;
+	justify-content: space-between;
+	padding: 0 5%;
+	font-size: 20px;
+	font-family: cursive;
+	color: var(--color-white);
+	font-family: "Sora", sans-serif;
+	font-weight: 100;
+	font-style: normal;
+}
+
+.footer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 1px 1px 0px 5px #696969;
+    background: #808080;
+    color: var(--color-white);
+    height: 56px;
+    width: 100%;
+}
+
+.ativo{
+	background-color: var(--color-AzulEscuro);
+	padding: 10px;
+	border-radius: 10px;
+}
+
+.content {
+    flex: 1;
+    text-align: center;
+    padding-top: 70px;
+    transition: 1s;
+}
+
+.btn_icon_header{
+	background-color:transparent;
+	border:none;
+	color:white;
+	cursor:pointer;
+	display:none;
+}
+
+.container {
+	display: flex;
+	align-items: center;
+	padding: 0 50px;
+}
+
+.curved{
+	display: block;
+	background: var(--color-white);
+	color: var(--color-white);
+	text-align: center;
+	h1{
+		font-size: 35px;
+		text-align: center;
+		font-family: cursive;
+		color: black;
+		font-family: "Sora", sans-serif;
+		font-weight: 100;
+		font-style: normal;
+	}
+}
+
+.curved.top{
+	display: block;
+	background: var(--color-AzulEscuro);
+	color: var(--color-white);
+	text-align: center;
+}
+
+#imgEsquerda{
+	display: flex;
+	margin: auto;
+	align-self: left;
+}
+
+#imgDireita{
+	display: flex;
+	margin: auto;
+	align-self: right;
+}
+
+@media screen and (max-width: 700px){
+	.btn_icon_header{
+		display:block;
+	}
+	.headerNav{
+		position:absolute;
+		flex-direction:column;
+		top:0;
+		background-color: gray;
+		height:100%;
+		width:35vw;
+		padding:16px;
+		animation-duration:1s;
+		margin-left:-100vw;
+	}
+}
+
+@keyframes showSideBar{
+	from {margin-left:-100vw};
+	top {margi-left: -10vw};
+}

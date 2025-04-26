@@ -1,0 +1,789 @@
+html,
+body,
+div,
+span,
+applet,
+object,
+iframe,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+blockquote,
+pre,
+a,
+abbr,
+acronym,
+address,
+big,
+cite,
+code,
+del,
+dfn,
+em,
+img,
+ins,
+kbd,
+q,
+s,
+samp,
+small,
+strike,
+strong,
+sub,
+sup,
+tt,
+var,
+b,
+u,
+i,
+center,
+dl,
+dt,
+dd,
+ol,
+ul,
+li,
+fieldset,
+form,
+label,
+legend,
+table,
+caption,
+tbody,
+tfoot,
+thead,
+tr,
+th,
+td,
+article,
+aside,
+canvas,
+details,
+embed,
+figure,
+figcaption,
+footer,
+header,
+hgroup,
+menu,
+nav,
+output,
+ruby,
+section,
+summary,
+time,
+mark,
+audio,
+video {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 100%;
+  font: inherit;
+  vertical-align: baseline;
+}
+/* HTML5 display-role reset for older browsers */
+article,
+aside,
+details,
+figcaption,
+figure,
+footer,
+header,
+hgroup,
+menu,
+nav,
+section {
+  display: block;
+}
+body {
+  line-height: 1;
+}
+ol,
+ul {
+  list-style: none;
+}
+blockquote,
+q {
+  quotes: none;
+}
+blockquote:before,
+blockquote:after,
+q:before,
+q:after {
+  content: "";
+  content: none;
+}
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+@import url("https://fonts.googleapis.com/css2?family=Courgette&family=Noto+Serif:wght@400;700&display=swap");
+
+$dark: #3c486b;
+$middle: #f45050;
+$light: #f9d949;
+$lightest: #f0f0f0;
+$lightblue: #409fad;
+
+$brand-font: "Courgette", cursive;
+$page-font: "Noto Serif", serif;
+
+@keyframes fade-in {
+  from {
+    // background-color: $dark;
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+body {
+  .ham-menu {
+    // line-height: 0;
+    #btn {
+      width: 25px;
+      position: absolute;
+      left: 42px;
+      top: 40px;
+
+      &:hover {
+        cursor: pointer;
+      }
+    }
+  }
+  .home-button {
+    // line-height: 0;
+    #btn {
+      width: 25px;
+      position: absolute;
+      right: 42px;
+      top: 40px;
+
+      &:hover {
+        cursor: pointer;
+      }
+    }
+  }
+  main {
+    height: 100vh;
+    background-color: $dark;
+    section {
+      .container {
+        .row {
+          .column-left {
+            transition: all 0.3s;
+            float: left;
+            width: 20%;
+            height: calc(100vh - 40px);
+
+            section {
+              transition: all 0.3s;
+              background-color: $lightest;
+              margin: 20px;
+              margin-right: 0px;
+              min-height: 100%;
+              border-radius: 20px;
+              overflow: hidden;
+              .profile {
+                .container-2 {
+                  transition: all 0.3s;
+                  background-image: linear-gradient(
+                    to top,
+                    #f0f0f0 1%,
+                    #409fad 40%
+                  );
+                  height: 50vh;
+
+                  // .bank-name {
+                  //   p {
+                  //     text-align: center;
+                  //     padding-top: 15px;
+                  //     span {
+                  //       font-family: $brand-font;
+                  //       font-size: 40px;
+                  //       color: $lightest;
+                  //     }
+                  //   }
+                  // }
+                }
+                .photo {
+                  text-align: center;
+                  .img {
+                    transition: all 0.3s;
+                    display: inline-block;
+                    margin-top: 5vh;
+                    img {
+                      transition: all 0.3s;
+
+                      width: 14vh;
+                      height: 14vh;
+                      border-radius: 100%;
+                    }
+                  }
+                }
+                .name {
+                  .container-3 {
+                    .text {
+                      margin-top: 5vh;
+                      .hello {
+                        text-align: center;
+                        font-family: $page-font;
+                        color: $lightest;
+                      }
+                      .fname {
+                        margin-top: 1vh;
+                        text-align: center;
+                        font-family: $page-font;
+                        color: $lightest;
+                        font-size: 40px;
+                        font-weight: bold;
+                        // -webkit-text-stroke: 1px $dark;
+                      }
+                    }
+                  }
+                }
+              }
+            }
+            // balance-----------------------------------------------------------
+            section {
+              .balance-container {
+                transition: all 0.3s;
+
+                .balance-text {
+                  p {
+                    text-align: center;
+                    padding-top: 20px;
+
+                    span {
+                      color: $dark;
+                      font-family: $page-font;
+                      font-size: 25px;
+                    }
+                    .money {
+                      color: $dark;
+                      font-family: $page-font;
+                      font-size: 50px;
+                      font-weight: bold;
+                    }
+                  }
+                }
+              }
+
+              .account-info {
+                // text-align: center;
+                .info-text {
+                  transition: all 0.3s;
+
+                  // position: absolute;
+                  margin-top: 10vh;
+                  p {
+                    text-align: center;
+                    span {
+                      color: $dark;
+                      font-family: $page-font;
+                      font-size: 15px;
+                    }
+                  }
+                }
+              }
+            }
+          }
+
+          //   left active -------------------------------------
+
+          .column-left.active {
+            transition: all 0.3s;
+            width: 90px;
+            section {
+              transition: all 0.3s;
+              background-color: $dark;
+              .profile {
+                .container-2 {
+                  background-image: none;
+                  transition: all 0.3s;
+                  // .bank-name {
+                  //   display: none;
+                  // }
+
+                  .photo {
+                    .img {
+                      transition: all 0.3s;
+
+                      display: inline-block;
+                      border-radius: 100%;
+                      margin-top: 7vh;
+                      img {
+                        width: 30px;
+                        height: 30px;
+                        transition: all 0.3s;
+                      }
+                    }
+                  }
+                  .name {
+                    .container-3 {
+                      .text {
+                        .hello {
+                          display: none;
+                        }
+                        .fname {
+                          display: none;
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+              .balance-container {
+                transition: all 0.3s;
+
+                display: none;
+              }
+              .account-info {
+                transition: all 0.3s;
+
+                display: none;
+              }
+            }
+          }
+        }
+
+        // left active finish-----------------------------------------
+
+        // middle start --------------------------------------------
+        .column-middle {
+          animation: fade-in 0.5s ease-in;
+
+          transition: all 0.3s;
+
+          float: left;
+          width: 40%;
+          height: calc(100vh - 40px);
+
+          section {
+            background-color: $lightest;
+            margin: 20px;
+            margin-right: 0px;
+            min-height: 100%;
+            border-radius: 20px;
+            overflow: hidden;
+
+            .transaction {
+              .trans-container {
+                .title {
+                  text-align: center;
+                  background-image: linear-gradient(
+                    to top,
+                    #f0f0f0 1%,
+                    #409fad 95%
+                  );
+                  height: 15vh;
+
+                  p {
+                    // padding-top: 2vh;
+
+                    span {
+                      display: inline-block;
+                      width: 40%;
+                      text-align: center;
+                      font-family: $page-font;
+                      color: $lightest;
+                      font-size: 30px;
+                      font-weight: bold;
+                      background-color: $dark;
+                      padding: 2vh;
+                      border-bottom-left-radius: 20px;
+                      border-bottom-right-radius: 20px;
+                      // border-top-right-radius: -20px ;
+                    }
+                  }
+                }
+                .trans-info {
+                  height: 80vh;
+                  overflow: scroll;
+                  .history {
+                    padding-right: 25px;
+                    padding-left: 25px;
+                    .element {
+                      p {
+                        font-family: $page-font;
+                        font-size: 20px;
+                        margin: 5px;
+                        color: $dark;
+
+                        .flash {
+                          float: right;
+                          margin-right: 5px;
+                          img {
+                            height: 20px;
+                          }
+                        }
+
+                        .money {
+                          float: right;
+                        }
+                      }
+                    }
+                  }
+
+                  .container {
+                    .warning {
+                      margin-left: 10%;
+                      margin-right: 10%;
+                      p {
+                        margin: 20px;
+                        margin-top: 50px;
+                        line-height: 25px;
+                        text-align: center;
+                        span {
+                          font-family: $page-font;
+                          font-size: 20px;
+                        }
+                      }
+                      #status {
+                        background-color: #d1d1d1;
+                        margin-top: 40px;
+                        margin-right: 20%;
+                        margin-left: 20%;
+
+                        padding: 20px;
+                        border: 3px solid green;
+                        border-radius: 20px;
+                        // display: block;
+                        // width: 50%;
+                      }
+                    }
+
+                    .activation-button {
+                      display: flex;
+                      flex-direction: column;
+                      margin-left: 10%;
+                      margin-right: 10%;
+                      .activation {
+                        margin-top: 40px;
+                        border: none;
+                        border-radius: 35px;
+                        color: $lightest;
+                        font-family: $page-font;
+                        font-size: 20px;
+                        font-weight: bold;
+                        padding: 15px;
+                        transition: all 0.4s;
+                        background-color: #f45050;
+                        cursor: pointer;
+
+                      }
+
+                    }
+
+                    form {
+                      display: flex;
+                      flex-direction: column;
+                      margin-left: 10%;
+                      margin-right: 10%;
+
+                      .dollor-sign {
+                        p {
+                          text-align: right;
+                          // position: absolute;
+                          span {
+                            position: absolute;
+                            margin-top: -40px;
+                            margin-left: -40px;
+                            font-family: $page-font;
+                            color: green;
+                            font-size: 30px;
+                          }
+                        }
+                      }
+
+                      .bill-detail {
+                        margin-top: 50px;
+                        text-align: center;
+                        p {
+                          span {
+                            font-family: $page-font;
+                            color: $dark;
+                            font-size: 20px;
+                          }
+                        }
+                        .bill-name-amount {
+                          background-color: #d1d1d1;
+                          margin-top: 20px;
+                          padding: 20px;
+                          border: 2px solid $dark;
+                          border-radius: 20px;
+                          display: inline-block;
+                          width: 50%;
+                        }
+                      }
+
+                      label {
+                        font-family: $page-font;
+                        font-size: 20px;
+                        color: $dark;
+
+                        text-align: center;
+                        padding: 20px;
+                        margin-top: 30px;
+                      }
+                      input {
+                        border: 2px solid $dark;
+                        border-radius: 20px;
+                        background-color: $lightest;
+                        font-family: $page-font;
+                        font-size: 20px;
+                        font-weight: bold;
+                        padding: 10px;
+                        text-align: center;
+                        color: $dark;
+                      }
+                      button {
+                        margin-top: 70px;
+                        border: none;
+                        background-color: $middle;
+                        border-radius: 35px;
+                        color: $lightest;
+                        font-family: $page-font;
+                        font-size: 20px;
+                        font-weight: bold;
+                        padding: 15px;
+                        transition: all 0.4s;
+                        cursor: pointer;
+                        &:hover {
+                          background-color: $light;
+                          transition: all 0.4s;
+                        }
+                      }
+                    }
+                  }
+                }
+                .trans-info::-webkit-scrollbar {
+                  display: none;
+                }
+              }
+            }
+          }
+        }
+
+        // middle active--------------------------------
+        .column-middle.active {
+          transition: all 0.3s;
+
+          float: left;
+
+          width: calc((100% - 180px) / 2);
+          height: calc(100vh - 40px);
+
+          section {
+            background-color: $lightest;
+            margin: 20px;
+            margin-right: 0px;
+            min-height: 100%;
+            border-radius: 20px;
+          }
+        }
+
+        // right start ------------------------------------------
+        .column-right {
+          transition: all 0.3s;
+
+          float: left;
+          width: 40%;
+          height: calc(100vh - 40px);
+          section {
+            background-color: $lightest;
+            margin: 20px;
+            min-height: 100%;
+            border-radius: 20px;
+            overflow: hidden;
+            .card {
+              .card-container {
+                .title {
+                  text-align: center;
+                  background-image: linear-gradient(
+                    to top,
+                    #f0f0f0 1%,
+                    #409fad 95%
+                  );
+                  height: 15vh;
+
+                  p {
+                    // padding-top: 2vh;
+
+                    span {
+                      display: inline-block;
+                      width: 40%;
+                      text-align: center;
+                      font-family: $page-font;
+                      color: $lightest;
+                      font-size: 30px;
+                      font-weight: bold;
+                      background-color: $dark;
+                      padding: 2vh;
+                      border-bottom-left-radius: 20px;
+                      border-bottom-right-radius: 20px;
+                    }
+                  }
+                }
+                .card-visual {
+                  position: relative;
+                  text-align: center;
+                  margin-top: 17vh;
+                  .card-pic {
+                    background-image: linear-gradient(
+                      to right top,
+                      #3c486b 20%,
+                      #f45050 80%,
+                      #f9d949
+                    );
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    width: 485px;
+                    height: 306px;
+                    border-radius: 20px;
+                    box-shadow: 0px 6px 15px 0 rgba(0, 0, 0, 0.7); /* add a light gray shadow */
+
+                    .card-brand {
+                      p {
+                        margin-top: 35px;
+                        span {
+                          font-family: $brand-font;
+                          color: $lightest;
+                          font-size: 40px;
+                        }
+                      }
+                    }
+                    .chip {
+                      img {
+                        width: 85px;
+                        margin-left: -340px;
+                        margin-top: 28px;
+                      }
+                    }
+                    .name {
+                      p {
+                        margin-top: -40px;
+                        span {
+                          font-family: $page-font;
+                          color: $lightest;
+                          font-size: 20px;
+                          font-weight: bold;
+                        }
+                      }
+                    }
+                    .card-num {
+                      p {
+                        margin-top: 40px;
+                        span {
+                          font-family: $page-font;
+                          color: $lightest;
+                          font-size: 30px;
+                          font-weight: bold;
+                          padding: 15px;
+                        }
+                      }
+                    }
+                    .card-exp-cvv {
+                      p {
+                        margin: 20px;
+                        margin-top: 55px;
+                        span {
+                          color: $lightest;
+                          font-family: $page-font;
+                        }
+                      }
+                    }
+                  }
+                }
+                .tools-container {
+                  margin-top: 35vh;
+                  .tools-row {
+                    padding-top: 3vh;
+                    padding-left: 5%;
+                    padding-right: 5%;
+                    .tools-column {
+                      float: left;
+                      width: 50%;
+                      .option {
+                        background-color: #dfdfdfa1;
+                        height: 60px;
+                        margin: 25px;
+                        border-radius: 20px;
+                        box-shadow: 0px 1px 15px rgba(0, 0, 0, 0.6); /* add a light gray shadow */
+                        cursor: pointer;
+                        transition: all 0.3s;
+
+                        &:hover {
+                          box-shadow: 0px 1px 15px rgba(0, 0, 0); /* add a light gray shadow */
+                          transition: all 0.3s;
+                        }
+
+                        .container {
+                          vertical-align: middle;
+                          line-height: 60px;
+                          .logo {
+                            float: left;
+                            width: 20%;
+                            background-color: $dark;
+                            height: 50px;
+                            margin: 5px;
+                            border-radius: 15px;
+                            text-align: center;
+                            line-height: 47px;
+
+                            img {
+                              height: 40px;
+                              text-align: center;
+                              vertical-align: middle;
+                            }
+                          }
+                          .text {
+                            float: left;
+                            width: 70%;
+                            p {
+                              text-align: center;
+                              color: $dark;
+                              font-family: $page-font;
+                              vertical-align: middle;
+                              margin-left: -15%;
+                              font-size: 16px;
+                              font-weight: bold;
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+        .column-right.active {
+          transition: all 0.3s;
+
+          float: left;
+          width: calc((100% - 180px) / 2);
+
+          height: calc(100vh - 40px);
+          section {
+            background-color: $lightest;
+            margin: 20px;
+
+            min-height: 100%;
+            border-radius: 20px;
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,674 @@
+@import url("https://fonts.googleapis.com/css2?family=Sora:wght@100..800&family=Urbanist:ital,wght@0,100..900;1,100..900&display=swap");
+html,
+body,
+div,
+span,
+applet,
+object,
+iframe,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+blockquote,
+pre,
+a,
+abbr,
+acronym,
+address,
+big,
+cite,
+code,
+del,
+dfn,
+em,
+img,
+ins,
+kbd,
+q,
+s,
+samp,
+small,
+strike,
+strong,
+sub,
+sup,
+tt,
+var,
+b,
+u,
+i,
+center,
+dl,
+dt,
+dd,
+ol,
+ul,
+li,
+fieldset,
+form,
+label,
+legend,
+table,
+caption,
+tbody,
+tfoot,
+thead,
+tr,
+th,
+td,
+article,
+aside,
+canvas,
+details,
+embed,
+figure,
+figcaption,
+footer,
+header,
+hgroup,
+menu,
+nav,
+output,
+ruby,
+section,
+summary,
+time,
+mark,
+audio,
+video {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 100%;
+  font: inherit;
+  vertical-align: baseline;
+}
+
+/* HTML5 display-role reset for older browsers */
+article,
+aside,
+details,
+figcaption,
+figure,
+footer,
+header,
+hgroup,
+menu,
+nav,
+section {
+  display: block;
+}
+
+body {
+  line-height: 1;
+}
+
+ol,
+ul {
+  list-style: none;
+}
+
+blockquote,
+q {
+  quotes: none;
+}
+
+blockquote:before,
+blockquote:after,
+q:before,
+q:after {
+  content: "";
+  content: none;
+}
+
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+body .ham-menu #btn {
+  width: 25px;
+  position: absolute;
+  left: 42px;
+  top: 40px;
+}
+body .ham-menu #btn:hover {
+  cursor: pointer;
+}
+body .home-button #btn {
+  width: 25px;
+  position: absolute;
+  right: 42px;
+  top: 40px;
+}
+body .home-button #btn:hover {
+  cursor: pointer;
+}
+body main {
+  height: 100vh;
+  background-image: url(../files/pics/bgtostao.jpg);
+}
+body main section .container .row .column-left {
+  transition: all 0.3s;
+  float: left;
+  width: 20%;
+  height: calc(100vh - 40px);
+}
+body main section .container .row .column-left section {
+  transition: all 0.3s;
+  background-color: #f0f0f0;
+  margin: 20px;
+  margin-right: 0px;
+  min-height: 100%;
+  border-radius: 20px;
+  overflow: hidden;
+}
+body main section .container .row .column-left section .profile .container-2 {
+  transition: all 0.3s;
+  background-image: linear-gradient(to top, #f0f0f0 1%, #301ca6 40%);
+  height: 50vh;
+}
+body main section .container .row .column-left section .profile .photo {
+  text-align: center;
+}
+body main section .container .row .column-left section .profile .photo .img {
+  transition: all 0.3s;
+  display: inline-block;
+  margin-top: 5vh;
+}
+body main section .container .row .column-left section .profile .photo .img img {
+  transition: all 0.3s;
+  width: 14vh;
+  height: 14vh;
+  border-radius: 100%;
+}
+body main section .container .row .column-left section .profile .name .container-3 .text {
+  margin-top: 5vh;
+}
+body main section .container .row .column-left section .profile .name .container-3 .text .hello {
+  text-align: center;
+  font-family: "Sora", sans-serif;
+  color: #f0f0f0;
+}
+body main section .container .row .column-left section .profile .name .container-3 .text .fname {
+  margin-top: 1vh;
+  text-align: center;
+  font-family: "Sora", sans-serif;
+  color: #f0f0f0;
+  font-size: 40px;
+  font-weight: bold;
+}
+body main section .container .row .column-left section .balance-container {
+  transition: all 0.3s;
+}
+body main section .container .row .column-left section .balance-container .balance-text p {
+  text-align: center;
+  padding-top: 20px;
+}
+body main section .container .row .column-left section .balance-container .balance-text p span {
+  color: #2B178B;
+  font-family: "Sora", sans-serif;
+  font-size: 25px;
+}
+body main section .container .row .column-left section .balance-container .balance-text p .money {
+  color: #2B178B;
+  font-family: "Sora", sans-serif;
+  font-size: 50px;
+  font-weight: bold;
+}
+body main section .container .row .column-left section .account-info .info-text {
+  transition: all 0.3s;
+  margin-top: 10vh;
+}
+body main section .container .row .column-left section .account-info .info-text p {
+  text-align: center;
+}
+body main section .container .row .column-left section .account-info .info-text p span {
+  color: #2B178B;
+  font-family: "Sora", sans-serif;
+  font-size: 15px;
+}
+body main section .container .row .column-left.active {
+  transition: all 0.3s;
+  width: 90px;
+}
+body main section .container .row .column-left.active section {
+  transition: all 0.3s;
+  background-color: #2B178B;
+}
+body main section .container .row .column-left.active section .profile .container-2 {
+  background-image: none;
+  transition: all 0.3s;
+}
+body main section .container .row .column-left.active section .profile .container-2 .photo .img {
+  transition: all 0.3s;
+  display: inline-block;
+  border-radius: 100%;
+  margin-top: 7vh;
+}
+body main section .container .row .column-left.active section .profile .container-2 .photo .img img {
+  width: 30px;
+  height: 30px;
+  transition: all 0.3s;
+}
+body main section .container .row .column-left.active section .profile .container-2 .name .container-3 .text .hello {
+  display: none;
+}
+body main section .container .row .column-left.active section .profile .container-2 .name .container-3 .text .fname {
+  display: none;
+}
+body main section .container .row .column-left.active section .balance-container {
+  transition: all 0.3s;
+  display: none;
+}
+body main section .container .row .column-left.active section .account-info {
+  transition: all 0.3s;
+  display: none;
+}
+body main section .container .column-middle {
+  animation: fade-in 0.5s ease-in;
+  transition: all 0.3s;
+  float: left;
+  width: 40%;
+  height: calc(100vh - 40px);
+}
+body main section .container .column-middle section {
+  background-color: #f0f0f0;
+  margin: 20px;
+  margin-right: 0px;
+  min-height: 100%;
+  border-radius: 20px;
+  overflow: hidden;
+}
+body main section .container .column-middle section .transaction .trans-container .title {
+  text-align: center;
+  background-image: linear-gradient(to top, #f0f0f0 1%, #301ca6 95%);
+  height: 15vh;
+}
+body main section .container .column-middle section .transaction .trans-container .title p span {
+  display: inline-block;
+  width: 40%;
+  text-align: center;
+  font-family: "Sora", sans-serif;
+  color: #f0f0f0;
+  font-size: 30px;
+  font-weight: bold;
+  background-color: #2B178B;
+  padding: 2vh;
+  border-bottom-left-radius: 20px;
+  border-bottom-right-radius: 20px;
+}
+body main section .container .column-middle section .transaction .trans-container .trans-info {
+  height: 80vh;
+  overflow: scroll;
+}
+body main section .container .column-middle section .transaction .trans-container .trans-info .history {
+  padding-right: 25px;
+  padding-left: 25px;
+}
+body main section .container .column-middle section .transaction .trans-container .trans-info .history .element p {
+  font-family: "Sora", sans-serif;
+  font-size: 20px;
+  margin: 5px;
+  color: #2B178B;
+}
+body main section .container .column-middle section .transaction .trans-container .trans-info .history .element p .flash {
+  float: right;
+  margin-right: 5px;
+}
+body main section .container .column-middle section .transaction .trans-container .trans-info .history .element p .flash img {
+  height: 20px;
+}
+body main section .container .column-middle section .transaction .trans-container .trans-info .history .element p .money {
+  float: right;
+}
+body main section .container .column-middle section .transaction .trans-container .trans-info .container .warning {
+  margin-left: 10%;
+  margin-right: 10%;
+}
+body main section .container .column-middle section .transaction .trans-container .trans-info .container .warning p {
+  margin: 20px;
+  margin-top: 50px;
+  line-height: 25px;
+  text-align: center;
+}
+body main section .container .column-middle section .transaction .trans-container .trans-info .container .warning p span {
+  font-family: "Sora", sans-serif;
+  font-size: 20px;
+}
+body main section .container .column-middle section .transaction .trans-container .trans-info .container .warning #status {
+  background-color: #d1d1d1;
+  margin-top: 40px;
+  margin-right: 20%;
+  margin-left: 20%;
+  padding: 20px;
+  border: 3px solid green;
+  border-radius: 20px;
+}
+body main section .container .column-middle section .transaction .trans-container .trans-info .container .activation-button {
+  display: flex;
+  flex-direction: column;
+  margin-left: 10%;
+  margin-right: 10%;
+}
+body main section .container .column-middle section .transaction .trans-container .trans-info .container .activation-button .activation {
+  margin-top: 40px;
+  border: none;
+  border-radius: 35px;
+  color: #f0f0f0;
+  font-family: "Sora", sans-serif;
+  font-size: 20px;
+  font-weight: bold;
+  padding: 15px;
+  transition: all 0.4s;
+  background-color: #552F72;
+  cursor: pointer;
+}
+body main section .container .column-middle section .transaction .trans-container .trans-info .container form {
+  display: flex;
+  flex-direction: column;
+  margin-left: 10%;
+  margin-right: 10%;
+}
+body main section .container .column-middle section .transaction .trans-container .trans-info .container form .dollor-sign p {
+  text-align: right;
+}
+body main section .container .column-middle section .transaction .trans-container .trans-info .container form .dollor-sign p span {
+  position: absolute;
+  margin-top: -40px;
+  margin-left: -40px;
+  font-family: "Sora", sans-serif;
+  color: green;
+  font-size: 30px;
+}
+body main section .container .column-middle section .transaction .trans-container .trans-info .container form .bill-detail {
+  margin-top: 50px;
+  text-align: center;
+}
+body main section .container .column-middle section .transaction .trans-container .trans-info .container form .bill-detail p span {
+  font-family: "Sora", sans-serif;
+  color: #2B178B;
+  font-size: 20px;
+}
+body main section .container .column-middle section .transaction .trans-container .trans-info .container form .bill-detail .bill-name-amount {
+  background-color: #d1d1d1;
+  margin-top: 20px;
+  padding: 20px;
+  border: 2px solid #2B178B;
+  border-radius: 20px;
+  display: inline-block;
+  width: 50%;
+}
+body main section .container .column-middle section .transaction .trans-container .trans-info .container form label {
+  font-family: "Sora", sans-serif;
+  font-size: 20px;
+  color: #2B178B;
+  text-align: center;
+  padding: 20px;
+  margin-top: 30px;
+}
+body main section .container .column-middle section .transaction .trans-container .trans-info .container form input {
+  border: 2px solid #2B178B;
+  border-radius: 20px;
+  background-color: #f0f0f0;
+  font-family: "Sora", sans-serif;
+  font-size: 20px;
+  font-weight: bold;
+  padding: 10px;
+  text-align: center;
+  color: #2B178B;
+}
+body main section .container .column-middle section .transaction .trans-container .trans-info .container form button {
+  margin-top: 70px;
+  border: none;
+  background-color: #552F72;
+  border-radius: 35px;
+  color: #f0f0f0;
+  font-family: "Sora", sans-serif;
+  font-size: 20px;
+  font-weight: bold;
+  padding: 15px;
+  transition: all 0.4s;
+  cursor: pointer;
+}
+body main section .container .column-middle section .transaction .trans-container .trans-info .container form button:hover {
+  background-color: #8d4dbd;
+  transition: all 0.4s;
+}
+body main section .container .column-middle section .transaction .trans-container .trans-info::-webkit-scrollbar {
+  display: none;
+}
+body main section .container .column-middle.active {
+  transition: all 0.3s;
+  float: left;
+  width: calc((100% - 180px) / 2);
+  height: calc(100vh - 40px);
+}
+body main section .container .column-middle.active section {
+  background-color: #f0f0f0;
+  margin: 20px;
+  margin-right: 0px;
+  min-height: 100%;
+  border-radius: 20px;
+}
+body main section .container .column-right {
+  transition: all 0.3s;
+  float: left;
+  width: 40%;
+  height: calc(100vh - 40px);
+}
+body main section .container .column-right section {
+  background-color: #f0f0f0;
+  margin: 20px;
+  min-height: 100%;
+  border-radius: 20px;
+  overflow: hidden;
+}
+body main section .container .column-right section .card .card-container .title {
+  text-align: center;
+  background-image: linear-gradient(to top, #f0f0f0 1%, #301ca6 95%);
+  height: 15vh;
+}
+body main section .container .column-right section .card .card-container .title p span {
+  display: inline-block;
+  width: 40%;
+  text-align: center;
+  font-family: "Sora", sans-serif;
+  color: #f0f0f0;
+  font-size: 30px;
+  font-weight: bold;
+  background-color: #2B178B;
+  padding: 2vh;
+  border-bottom-left-radius: 20px;
+  border-bottom-right-radius: 20px;
+}
+body main section .container .column-right section .card .card-container .card-visual {
+  position: relative;
+  text-align: center;
+  margin-top: 17vh;
+}
+body main section .container .column-right section .card .card-container .card-visual .card-pic {
+  background-image: linear-gradient(to right top, #2B178B 20%, #552F72 80%, #8d4dbd);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 485px;
+  height: 306px;
+  border-radius: 20px;
+  box-shadow: 0px 6px 15px 0 rgba(0, 0, 0, 0.7); /* add a light gray shadow */
+}
+body main section .container .column-right section .card .card-container .card-visual .card-pic .card-brand p {
+  margin-top: 35px;
+}
+body main section .container .column-right section .card .card-container .card-visual .card-pic .card-brand p span {
+  font-family: "Sora", sans-serif;
+  color: #f0f0f0;
+  font-size: 40px;
+}
+body main section .container .column-right section .card .card-container .card-visual .card-pic .chip img {
+  width: 85px;
+  margin-left: -340px;
+  margin-top: 28px;
+}
+body main section .container .column-right section .card .card-container .card-visual .card-pic .name p {
+  margin-top: -40px;
+}
+body main section .container .column-right section .card .card-container .card-visual .card-pic .name p span {
+  font-family: "Sora", sans-serif;
+  color: #f0f0f0;
+  font-size: 20px;
+  font-weight: bold;
+}
+body main section .container .column-right section .card .card-container .card-visual .card-pic .card-num p {
+  margin-top: 40px;
+}
+body main section .container .column-right section .card .card-container .card-visual .card-pic .card-num p span {
+  font-family: "Sora", sans-serif;
+  color: #f0f0f0;
+  font-size: 30px;
+  font-weight: bold;
+  padding: 15px;
+}
+body main section .container .column-right section .card .card-container .card-visual .card-pic .card-exp-cvv p {
+  margin: 20px;
+  margin-top: 55px;
+}
+body main section .container .column-right section .card .card-container .card-visual .card-pic .card-exp-cvv p span {
+  color: #f0f0f0;
+  font-family: "Sora", sans-serif;
+}
+body main section .container .column-right section .card .card-container .tools-container {
+  margin-top: 35vh;
+}
+body main section .container .column-right section .card .card-container .tools-container .tools-row {
+  padding-top: 3vh;
+  padding-left: 5%;
+  padding-right: 5%;
+}
+body main section .container .column-right section .card .card-container .tools-container .tools-row .tools-column {
+  float: left;
+  width: 50%;
+}
+body main section .container .column-right section .card .card-container .tools-container .tools-row .tools-column .option {
+  background-color: rgba(223, 223, 223, 0.631372549);
+  height: 60px;
+  margin: 25px;
+  border-radius: 20px;
+  box-shadow: 0px 1px 15px rgba(0, 0, 0, 0.6); /* add a light gray shadow */
+  cursor: pointer;
+  transition: all 0.3s;
+}
+body main section .container .column-right section .card .card-container .tools-container .tools-row .tools-column .option:hover {
+  box-shadow: 0px 1px 15px rgb(0, 0, 0); /* add a light gray shadow */
+  transition: all 0.3s;
+}
+body main section .container .column-right section .card .card-container .tools-container .tools-row .tools-column .option .container {
+  vertical-align: middle;
+  line-height: 60px;
+}
+body main section .container .column-right section .card .card-container .tools-container .tools-row .tools-column .option .container .logo {
+  float: left;
+  width: 20%;
+  background-color: #2B178B;
+  height: 50px;
+  margin: 5px;
+  border-radius: 15px;
+  text-align: center;
+  line-height: 47px;
+}
+body main section .container .column-right section .card .card-container .tools-container .tools-row .tools-column .option .container .logo img {
+  height: 40px;
+  text-align: center;
+  vertical-align: middle;
+}
+body main section .container .column-right section .card .card-container .tools-container .tools-row .tools-column .option .container .text {
+  float: left;
+  width: 70%;
+}
+body main section .container .column-right section .card .card-container .tools-container .tools-row .tools-column .option .container .text p {
+  text-align: center;
+  color: #2B178B;
+  font-family: "Sora", sans-serif;
+  vertical-align: middle;
+  margin-left: -15%;
+  font-size: 16px;
+  font-weight: bold;
+}
+body main section .container .column-right.active {
+  transition: all 0.3s;
+  float: left;
+  width: calc((100% - 180px) / 2);
+  height: calc(100vh - 40px);
+}
+body main section .container .column-right.active section {
+  background-color: #f0f0f0;
+  margin: 20px;
+  min-height: 100%;
+  border-radius: 20px;
+}/*# sourceMappingURL=dashboard-style.css.map */
+
+table {
+	border-radius: 20px;
+	font-family: "Sora", sans-serif;
+	text-align: center;
+	border-collapse: collapse;
+	border: none;
+	margin: 20px auto;
+	background-color: #EEEFEE;
+	box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+th, td {
+	padding: 10px;
+}
+
+th {
+	border-top-left-radius: 20px;
+	border-top-right-radius: 20px;
+	text-align: center;
+	width: 40%;
+	font-family: "Sora", sans-serif;
+	color: #f0f0f0;
+	font-size: 30px;
+	background-color: #2B178B;
+	color: white;
+	text-transform: uppercase;
+}
+
+tr:nth-child(even) {
+	background-color: #EEEFEE;
+}
+
+tr:hover {
+	background-color: #f1f1f1;
+}
+td h3 {
+	margin: 0;
+	color: black;
+}
+
+select{
+	appearance: none;
+	background-color: transparent;
+	border: 2px solid #2B178B;
+	border-radius: 20px;
+	margin: 0;
+	width: 100%;
+	font-size: 20px;
+	font-weight: bold;
+	padding: 10px;
+	text-align: center;
+}
