@@ -11,6 +11,11 @@ O código-fonte está disponível livremente e pode ser utilizado por qualquer p
 
 Sinta-se à vontade para estudar, modificar e reutilizar o código conforme necessário. :)
 
+![tostão bank apresentação id visual (1)](https://github.com/user-attachments/assets/87c2e424-f8ec-4d3f-913e-15963002e2f5)
+
+![image](https://github.com/user-attachments/assets/be8fa3a1-f028-4f88-9955-ed3e4981c123)
+
+
 📄 Licença
 Este projeto está licenciado sob a Licença MIT. Consulte o arquivo [LICENSE](./LICENSE) para mais detalhes.
 
