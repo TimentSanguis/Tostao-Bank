@@ -12,7 +12,7 @@ O código-fonte está disponível livremente e pode ser utilizado por qualquer p
 Sinta-se à vontade para estudar, modificar e reutilizar o código conforme necessário. :)
 
 📄 Licença
-Este projeto está licenciado sob a Licença MIT. Consulte o arquivo LICENSE para mais detalhes.
+Este projeto está licenciado sob a Licença MIT. Consulte o arquivo [LICENSE](./LICENSE) para mais detalhes.
 
 <h3>Tradução da Licença MIT (versão não oficial)
 
