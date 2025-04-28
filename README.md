@@ -2,6 +2,8 @@ Tostão Bank é um projeto desenvolvido na Fatec Mauá pelos alunos Caio Luis Ca
 
 O conceito consiste em desenvolver um banco fictício utilizando PHP e CSS, com o objetivo de ser simples e acessível, permitindo que os usuários o utilizem com facilidade.
 
+![tostão bank apresentação id visual](https://github.com/user-attachments/assets/afdfeaac-6484-4a4a-907a-c4432aed3363)
+
 ⚠️ Aviso
 Este projeto foi desenvolvido unicamente para fins educacionais, como parte de um estudo acadêmico na Fatec Mauá.
 
