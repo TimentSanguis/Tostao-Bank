@@ -13,6 +13,7 @@ Sinta-se à vontade para estudar, modificar e reutilizar o código conforme nece
 Este projeto está licenciado sob a Licença MIT. Consulte o arquivo LICENSE para mais detalhes.
 
 <h3>Tradução da Licença MIT (versão não oficial)
+
 A permissão é concedida, sem custos, para qualquer pessoa obter uma cópia deste software e dos arquivos de documentação associados (o "Software"), para usá-lo sem restrições, incluindo, sem limitação, os direitos de usar, copiar, modificar, mesclar, publicar, distribuir, sublicenciar e/ou vender cópias do Software, e permitir que as pessoas a quem o Software for fornecido façam o mesmo, desde que as seguintes condições sejam atendidas:
 
 A nota de copyright acima e esta permissão devem ser incluídas em todas as cópias ou partes substanciais do Software.
