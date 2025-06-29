@@ -1,0 +1,9 @@
+<svg version="1.2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
+	<title>seguros</title>
+	<defs>
+		<image  width="48" height="48" id="img1" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAMAAABg3Am1AAAAAXNSR0IB2cksfwAAAQhQTFRF////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////WzEhywAAAFh0Uk5TACbge/7/fwM2b5/F4fdwAkei7UgIbd3eW+LjXBu5ukPrRGD6ZP1N/CXxyGoL6dQrcqrT74SFo9buszg3svBTUix2IXMBfYF+aDTqNYeGnjEGtgqnqEGk3wlKtI0AAAH0SURBVHic7ZbdS9tgFMbPU0f1wiG1CuLcplGq4vfHBLcLpTpRQZCBf6UgiN9SO+bFNkQv6ipKcVH8wAu3jo5eaNUc86ZJ2rqkSSbeeXgh78k5vzxPSDgJyDIAYrauWAMlgHLnBfArQMYdUAotrqiMmV9k+LooUKG2/gVTbr1k323KDqgCkgXdYoGDCv+yBGqQd74gqnH+L1CHC/WKZKEgjrXK2QPgLc65CIBXOCoAJJzY2DHiDct5QJPKo6gCUwMfmkAIMjsCkDihAy04dPCTjSY+0IDSxoR5sWIKTKGf1wJoS7BLAKE9FWjHgStDIlo4Dqr+A9cKHLgEde67FiBq3UXXHnlQoDZ0xz0B7eiJe3BEKtC760mhE30xcay8aQSOkwYQrN9B73HSAAJ6Vd33o1kmfoevmt4HfFcfpEj9alvmvc9Ic1UJ5VeD2DQtDinftFSfGkPp2KDvS66ajpVhGIjm3VQYLFJjzOipWWW2m0vCkmXl8YPsf4FnS08CuLmHUZmkiBcF6ZRey14U/Mw+o8mVwsfPFF7X92NRhNecgPEN6tnS94E0jaw6ARMRrktnP3NVA+sYW3ICRn/8pvFFbTu1QsGOiBMgPPGk9pexDDtHBUBFeMEcQFPRlDNAnzCfBWhambPuf/hqzADb1M88a9NOdA/vPEKtB4nfygAAAABJRU5ErkJggg=="/>
+	</defs>
+	<style>
+	</style>
+	<use id="Background" href="#img1" x="0" y="0"/>
+</svg>

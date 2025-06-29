@@ -1,94 +1,130 @@
 <?php
-include '../php/conexao.php';
 session_start();
 
-// Verifica se o usuário está logado
 if (!isset($_SESSION['usuario'])) {
     header("Location: login.php");
     exit;
 }
 
-// Acessa as informações da sessão
-$nome_usuario = $_SESSION['usuario'];
-$saldo_usuario = $_SESSION['saldo'];
 $cliente_id = $_SESSION['id'];
 $email_usuario = $_SESSION['email'];
 $hoje = date('Y-m-d H:i:s');
+$desc = "Investido";
 
-$desc="Investido";
-// Verificar se o formulário foi enviado
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $valor_investir = $_POST['valor'];
-    $tipo_investimento = $_POST['tipo_investimento'];
+function callAPI($method, $url, $data = false) {
+    $curl = curl_init();
 
-    // Verificar o saldo atual do cliente
-    $sql = "SELECT saldo_usuario FROM usuario WHERE id_usuario = ?";
-    $stmt = $conecta_db->prepare($sql);
-    if (!$stmt) {
-        die("Erro na preparação da consulta: " . $conecta_db->error);
-    }
-
-    $stmt->bind_param("i", $cliente_id);
-    $stmt->execute();
-    $result = $stmt->get_result();
-
-    if ($result->num_rows > 0) {
-        $row = $result->fetch_assoc();
-        $saldo_cliente = $row['saldo_usuario'];
-
-        // Verificar se há saldo suficiente
-        if ($saldo_cliente >= $valor_investir) {
-            // Atualizar saldo no banco de dados
-            $novo_saldo = $saldo_cliente - $valor_investir;
-
-            $update_sql = "UPDATE usuario SET saldo_usuario = ? WHERE id_usuario = ?";
-            $update_stmt = $conecta_db->prepare($update_sql);
-            $update_stmt->bind_param("di", $novo_saldo, $cliente_id);
-            $update_stmt->execute();
-
-            // Atualizar o saldo na sessão
-            $_SESSION['saldo'] = $novo_saldo;
-
-            // Verificar se já existe um investimento desse tipo
-            $investimento_sql = "SELECT valor_investimento FROM investimento WHERE cliente_id = ? AND tipo_investimento = ?";
-            $investimento_stmt = $conecta_db->prepare($investimento_sql);
-            $investimento_stmt->bind_param("is", $cliente_id, $tipo_investimento);
-            $investimento_stmt->execute();
-            $investimento_result = $investimento_stmt->get_result();
-
-            if ($investimento_result->num_rows > 0) {
-                // Atualizar o investimento existente
-                $investimento_row = $investimento_result->fetch_assoc();
-                $valor_atual = $investimento_row['valor_investimento'];
-                $novo_valor = $valor_atual + $valor_investir;
-
-                $update_investimento_sql = "UPDATE investimento SET valor_investimento = ? WHERE cliente_id = ? AND tipo_investimento = ?";
-                $update_investimento_stmt = $conecta_db->prepare($update_investimento_sql);
-                $update_investimento_stmt->bind_param("dis", $novo_valor, $cliente_id, $tipo_investimento);
-                $update_investimento_stmt->execute();
-            } else {
-                // Inserir um novo investimento
-                $insert_investimento_sql = "INSERT INTO investimento (cliente_id, valor_investimento, tipo_investimento) VALUES (?, ?, ?)";
-                $insert_investimento_stmt = $conecta_db->prepare($insert_investimento_sql);
-                $insert_investimento_stmt->bind_param("ids", $cliente_id, $valor_investir, $tipo_investimento);
-                $insert_investimento_stmt->execute();
+    switch ($method) {
+        case "POST":
+            curl_setopt($curl, CURLOPT_POST, 1);
+            if ($data) curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($data));
+            break;
+        case "PUT":
+            curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "PUT");
+            if ($data) curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($data));
+            break;
+        case "DELETE":
+            curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "DELETE");
+            if ($data) curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($data));
+            break;
+        default:
+            if (is_array($data) && !empty($data)) {
+                $url = sprintf("%s?%s", $url, http_build_query($data));
             }
-
-            header('Location: ../confirmado.html');
-            $insertHist = $conecta_db->prepare("INSERT INTO historico (data_Transferencia, valor_Transferencia, email_Transferencia, tipo_Transferencia, desc_transferencia) VALUES (?, ?, ?, ?, ?)");
-            $insertHist->bind_param("sdsss", $hoje, $valor_investir, $email_usuario, $tipo_investimento, $desc);
-            $insertHist->execute();
-        } else {
-            echo "Saldo insuficiente para realizar o investimento.";
-        }
-    } else {
-        echo "Cliente não encontrado.";
+            break;
     }
 
-    // Fechar as instruções e a conexão
-    $stmt->close();
-    if (isset($update_stmt)) $update_stmt->close();
-    if (isset($investimento_stmt)) $investimento_stmt->close();
+    curl_setopt($curl, CURLOPT_URL, $url);
+    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($curl, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+
+    $result = curl_exec($curl);
+
+    if ($result === false) {
+        die("Erro na requisição cURL: " . curl_error($curl));
+    }
+
+    curl_close($curl);
+
+    return json_decode($result, true);
 }
 
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    if (!isset($_POST['valor'], $_POST['tipo_investimento'])) {
+        die("Dados do formulário incompletos.");
+    }
+
+    $valor_investir = floatval($_POST['valor']);
+    $tipo_investimento = $_POST['tipo_investimento'];
+
+    $apiBase = "http://localhost:8080/tostao/investir";
+
+    // 1. Buscar saldo atual do usuário via API
+    $urlSaldo = "{$apiBase}/usuario/{$cliente_id}/saldo";
+    $saldoResp = callAPI("GET", $urlSaldo);
+
+    if (!isset($saldoResp['saldo'])) {
+        die("Não foi possível obter saldo do usuário.");
+    }
+
+    $saldo_cliente = floatval($saldoResp['saldo']);
+
+    if ($saldo_cliente < $valor_investir) {
+        echo "Saldo insuficiente para realizar o investimento.";
+        exit;
+    }
+
+    // 2. Atualizar saldo do usuário
+    $novo_saldo = $saldo_cliente - $valor_investir;
+    $urlAtualizaSaldo = "{$apiBase}/usuario/{$cliente_id}/saldo";
+    $atualizaSaldoResp = callAPI("PUT", $urlAtualizaSaldo, ['saldo_usuario' => $novo_saldo]);
+
+    if (!isset($atualizaSaldoResp['success']) || !$atualizaSaldoResp['success']) {
+        die("Falha ao atualizar saldo.");
+    }
+
+    // 3. Buscar investimento do tipo específico
+    $urlBuscaInvest = "{$apiBase}/investimento";
+    $investimentos = callAPI("GET", $urlBuscaInvest, ['cliente_id' => $cliente_id, 'tipo_investimento' => $tipo_investimento]);
+
+    if (!empty($investimentos) && isset($investimentos[0])) {
+        $investimento = $investimentos[0];
+        $novo_valor = floatval($investimento['valor_investimento']) + $valor_investir;
+
+        $urlAtualizaInvest = "{$apiBase}/investimento/{$investimento['id']}";
+        $respAtualizaInvest = callAPI("PUT", $urlAtualizaInvest, ['valor_investimento' => $novo_valor]);
+
+        if (!isset($respAtualizaInvest['success']) || !$respAtualizaInvest['success']) {
+            die("Falha ao atualizar investimento.");
+        }
+    } else {
+        $urlCriarInvest = "{$apiBase}/investimento";
+        $respCriarInvest = callAPI("POST", $urlCriarInvest, [
+            'cliente_id' => $cliente_id,
+            'valor_investimento' => $valor_investir,
+            'tipo_investimento' => $tipo_investimento
+        ]);
+        if (!isset($respCriarInvest['success']) || !$respCriarInvest['success']) {
+            die("Falha ao criar investimento.");
+        }
+    }
+
+    // 4. Criar histórico da operação
+    $urlHist = "{$apiBase}/historico";
+    $respHist = callAPI("POST", $urlHist, [
+        'data_Transferencia' => $hoje,
+        'valor_Transferencia' => $valor_investir,
+        'email_Transferencia' => $email_usuario,
+        'tipo_Transferencia' => $tipo_investimento,
+        'desc_transferencia' => $desc
+    ]);
+
+    if (!isset($respHist['success']) || !$respHist['success']) {
+        die("Falha ao registrar histórico.");
+    }
+
+    $_SESSION['saldo'] = $novo_saldo;
+    header('Location: ../confirmado.html');
+    exit;
+}
 ?>

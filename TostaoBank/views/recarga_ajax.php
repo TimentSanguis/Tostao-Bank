@@ -1,73 +1,50 @@
 <?php
-include 'php/conexao.php'; 
-
 session_start();
 header('Content-Type: application/json');
 
-// Verifica se o usuário está logado
-if (!isset($_SESSION['usuario'])) {
-    echo json_encode(['mensagem' => 'Usuário não logado.']);
+// Verifica se o usuário está logado e tem token
+if (!isset($_SESSION['usuario']) || !isset($_SESSION['token'])) {
+    echo json_encode(['mensagem' => 'Usuário não autenticado.']);
     exit;
 }
 
-// Define o fuso horário
-date_default_timezone_set('America/Sao_Paulo');
+$email = $_SESSION['email'];
+$token = $_SESSION['token'];
+$valor = $_POST['txt_valor'];
+$numero = $_POST['txt_numero'];
 
-// Acessa as informações da sessão
-$nome_usuario = $_SESSION['usuario'];
-$email_usuario = $_SESSION['email'];
-$hoje = date('Y-m-d H:i:s');
-$tipo = 'Recarga';
+$data = [
+    'valor' => $valor,
+    'numero' => $numero,
+    'email' => $email
+];
 
-// Receber dados do formulário
-$numero = trim($_POST['txt_numero']);
-$valor = floatval(str_replace(',', '.', $_POST['txt_valor'])); // Converter para float
+// Requisição para a API
+$curl = curl_init();
 
-// Busca o saldo do usuário remetente
-$querySaldo = $conecta_db->prepare("SELECT saldo_usuario FROM usuario WHERE nome_usuario = ?");
-$querySaldo->bind_param("s", $nome_usuario);
-$querySaldo->execute();
-$resultSaldo = $querySaldo->get_result();
-$row = $resultSaldo->fetch_assoc();
+curl_setopt_array($curl, [
+    CURLOPT_URL => 'http://localhost:8080/tostao/recarga',//Conexão API
+    CURLOPT_RETURNTRANSFER => true,
+    CURLOPT_CUSTOMREQUEST => 'POST',
+    CURLOPT_POSTFIELDS => json_encode($data),
+    CURLOPT_HTTPHEADER => [
+        'Content-Type: application/json',
+        "Authorization: Bearer $token"
+    ],
+]);
 
-if (!$row) {
-    echo json_encode(['mensagem' => 'Erro ao buscar o saldo do usuário.']);
-    exit;
-}
+$response = curl_exec($curl);
+$http_code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+curl_close($curl);
 
-$saldo_usuario = $row['saldo_usuario'];
-
-// Verifica se o usuário tem saldo suficiente
-if ($saldo_usuario >= $valor) {
-    // Subtrai o valor do saldo do remetente
-    $novoSaldoRemetente = $saldo_usuario - $valor;
-    $updateRemetente = $conecta_db->prepare("UPDATE usuario SET saldo_usuario = ? WHERE nome_usuario = ?");
-    $updateRemetente->bind_param("ds", $novoSaldoRemetente, $nome_usuario);
-    $updateRemetente->execute();
-
-    // Insere informações no histórico
-    $insertHist = $conecta_db->prepare("INSERT INTO historico (data_transferencia, valor_transferencia, email_transferencia, tipo_transferencia, telefone_transferencia) VALUES (?, ?, ?, ?, ?)");
-    $insertHist->bind_param("sdsss", $hoje, $valor, $email_usuario, $tipo, $numero);
-    $insertHist->execute();
-	
-
-    // Verifica se a atualização foi bem-sucedida
-    if ($updateRemetente->affected_rows > 0 && $insertHist->affected_rows > 0) {
-        echo json_encode([
-            'mensagem' => "<h1><center>Pix de R$ " . number_format($valor, 2, ',', '.') . " para $numero realizado com sucesso!</center></h1>",
-            'saldo' => number_format($novoSaldoRemetente, 2, ',', '.')
-        ]);
-
-    } else {
-        echo json_encode(['mensagem' => "<h1><center>Erro ao processar a transferência.</center></h1>"]);
-    }
+if ($http_code === 200) {
+    $res = json_decode($response, true);
+    echo json_encode([
+        'mensagem' => $res['mensagem'] ?? 'Recarga realizada com sucesso.',
+        'saldo' => $res['saldo'] ?? null
+    ]);
 } else {
-    echo json_encode(['mensagem' => "<h1><center>Saldo insuficiente.</center></h1>"]);
+    echo json_encode(['mensagem' => 'Erro ao comunicar com a API de recarga.']);
 }
 
-// Fecha as declarações e a conexão
-$querySaldo->close();
-$updateRemetente->close();
-$insertHist->close();
-$conecta_db->close();
 ?>

@@ -1,54 +1,60 @@
 <?php
 session_start(); // Inicia a sessão
-include 'php/conexao.php'; 
 
 // Verifica se o usuário está logado
 if (!isset($_SESSION['usuario'])) {
-    header("Location: login.php"); // Redireciona para o login se não estiver logado
+    header("Location: login.php");
     exit;
 }
 
-// Acessa as informações da sessão
-$nome_usuario = htmlspecialchars($_SESSION['usuario'], ENT_QUOTES, 'UTF-8');
-$saldo_usuario = number_format($_SESSION['saldo'], 2, ',', '.');
-$email_usuario = htmlspecialchars($_SESSION['email'], ENT_QUOTES, 'UTF-8');
-$telefone_usuario = $_SESSION['telefone'];
-$num_cartao = isset($_SESSION['num_cartao']) ? $_SESSION['num_cartao'] : "Número de cartão não disponível";
-$num_formatado = preg_replace('/(\d{4})/', '$1   ', $num_cartao); // Divide em blocos de 4 separados por espaço
+$email_sessao = $_SESSION['email'];
 
-// Aqui você pode formatar o telefone, se necessário. Exemplo de formatação simples:
-$telefone_formatado = preg_replace('/(\d{2})(\d{5})(\d{4})/', '($1) $2-$3', $telefone_usuario);
+// URL base da API
+$apiBaseUrlUsuario = 'http://localhost:8080/tostao';//Conexão API
+$apiBaseUrlHistorico = 'http://localhost:8080/historico';
 
-if (isset($_SESSION['telefone'])) {
-    $telefone_usuario = $_SESSION['telefone'];
+// Função para fazer requisição GET via cURL
+function apiGetRequest($url) {
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+    $response = curl_exec($ch);
+    if (curl_errno($ch)) {
+        // Em caso de erro, pode tratar aqui
+        curl_close($ch);
+        return false;
+    }
+    curl_close($ch);
+    return json_decode($response, true);
+}
+
+// Buscar dados do usuário via API
+$userData = apiGetRequest($apiBaseUrlUsuario . "/usuario?email=" . urlencode($email_sessao));
+$transacoes = apiGetRequest($apiBaseUrlHistorico . "/transferencias?email=" . urlencode($email_sessao));
+
+if (!$userData) {
+    die("Erro ao buscar dados do usuário na API");
+}
+
+$nome_usuario = isset($userData['nomeUsuario']) ? htmlspecialchars($userData['nomeUsuario'], ENT_QUOTES, 'UTF-8') : 'Usuário';
+$saldo_usuario = isset($userData['saldoUsuario']) && is_numeric($userData['saldoUsuario'])? number_format($userData['saldoUsuario'], 2, ',', '.'): '0,00';
+$email_usuario = isset($userData['emailUsuario']) ? htmlspecialchars($userData['emailUsuario'], ENT_QUOTES, 'UTF-8') : '';
+$telefone_usuario = isset($userData['telefoneUsuario']) ? (string)$userData['telefoneUsuario'] : '';
+$num_cartao = isset($userData['cartaoUsuario']) ? (string)$userData['cartaoUsuario'] : "Número de cartão não disponível";
+$num_formatado = preg_replace('/(\d{4})/', '$1   ', $num_cartao);
+
+// Formatar telefone se estiver presente
+if ($telefone_usuario) {
     $telefone_formatado = preg_replace('/(\d{2})(\d{5})(\d{4})/', '($1) $2-$3', $telefone_usuario);
 } else {
-    $telefone_formatado = 'Telefone não disponível';  // Ou algum outro valor padrão
+    $telefone_formatado = '';
 }
- // Acessa as informações da sessão
- $nome_usuario = $_SESSION['usuario'];
- $cliente_id = $_SESSION['id'];
- 
-  // Consulta o saldo atualizado do usuário
- $sql = "SELECT saldo_usuario FROM usuario WHERE id_usuario = ?";
- $stmt = $conecta_db->prepare($sql);
- $stmt->bind_param("i", $cliente_id);
- $stmt->execute();
- $result = $stmt->get_result();
 
- if ($result->num_rows > 0) {
-     $row = $result->fetch_assoc();
-     $saldo_usuario = number_format($row['saldo_usuario'],2,',','.');
- } else {
-     echo "Usuário não encontrado.";
-     exit;
- }
-
- $stmt->close();
 ?>
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
   <head>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
@@ -108,21 +114,18 @@ if (isset($_SESSION['telefone'])) {
                 </div>
                 <div class="balance-container">
                   <div class="balance-text">
-                    <p><span>Seu Saldo:</span></p>
-                    <p>
-                      <span class="money"
-                        ><?php echo $saldo_usuario; ?>
-                        <span style="color: green; font-size: 50px"
-                          >$</span
-                        ></span
-                      >
-                    </p>
+                    <p><span>Seus Trocados:</span></p>
+                      <p>
+                        <span class="money">
+                          <span><span style="color: green; font-size: 25px">R$ </span><?php echo $saldo_usuario; ?></span>
+                        </span>
+                      </p>
                   </div>
                 </div>
                 <div class="account-info">
                   <div class="info-text">
                     <p style="margin-bottom: 10px">
-                      <span style="font-size: 20px">Dados Conta</span>
+                      <span style="font-size: 20px">Dados do Pobre</span>
                     </p>
                     <p><span>Email: <?php echo $email_usuario; ?></span></p>
                     <p><span>Celular: <?php echo $telefone_formatado; ?></span></p>
@@ -182,8 +185,8 @@ if (isset($_SESSION['telefone'])) {
                         </div>
                         <div class="card-exp-cvv">
                           <p>
-                            <span style="float: left">exp: 2024/07</span
-                            ><span style="float: right">cvv2: 999</span>
+                            <span style="float: left">exp: 2038/07</span
+                            ><span style="float: right">cvv: 999</span>
                           </p>
                         </div>
                       </div>
@@ -219,6 +222,17 @@ if (isset($_SESSION['telefone'])) {
                               <div class="text"><p>Caixinha</p></div>
                             </div>
                           </div>
+                          
+                            <!--Botão de Seguros-->
+                        <div class="option" onclick="window.location.href='dashboard-seguros.php'">
+                          <div class="container">
+                            <div class="logo">
+                              <img src="../resources/files/pics/seguros.svg" alt=""/>
+                            </div>
+                            <div class="text"><p>Seguros</p></div>
+                          </div>
+                        </div>
+
                           <div
                             class="option"
                             onclick="window.location.href='dashboard-recarga.php'"
@@ -279,16 +293,13 @@ if (isset($_SESSION['telefone'])) {
                               <div class="text"><p>Desativar conta</p></div>
                             </div>
                           </div>
-                          <div class="option" onclick="window.location.href='index.html'">
-                            <div class="container">
-                              <div class="logo">
-                                <img
-                                  src="../resources/files/pics/more.svg"
-                                  alt=""
-                                />
+                          <div class="option" onclick="window.location.href='dashboard.php?logout=true'">
+                              <div class="container">
+                                  <div class="logo">
+                                      <img src="../resources/files/pics/more.svg" alt="">
+                                  </div>
+                                  <div class="text"><p>Sair</p></div>
                               </div>
-                              <div class="text"><p>Sair</p></div>
-                            </div>
                           </div>
                         </div>
                       </div>

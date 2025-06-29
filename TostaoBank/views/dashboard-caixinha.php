@@ -1,5 +1,4 @@
 <?php
-include 'php/conexao.php';
 session_start(); // Inicia a sessão
 
 // Verifica se o usuário está logado
@@ -8,49 +7,125 @@ if (!isset($_SESSION['usuario'])) {
     exit;
 }
 
-// Acessa as informações da sessão
+// Pega informações da sessão
 $nome_usuario = htmlspecialchars($_SESSION['usuario'], ENT_QUOTES, 'UTF-8');
-$saldo_usuario = number_format($_SESSION['saldo'], 2, ',', '.');
 $email_usuario = htmlspecialchars($_SESSION['email'], ENT_QUOTES, 'UTF-8');
-$telefone_usuario = $_SESSION['telefone'];
-$num_cartao = isset($_SESSION['num_cartao']) ? $_SESSION['num_cartao'] : "Número de cartão não disponível";
-$num_formatado = preg_replace('/(\d{4})/', '$1   ', $num_cartao); // Divide em blocos de 4 separados por espaço
+$telefone_usuario = $_SESSION['telefone'] ?? null;
 
+// Pega o id do cliente da sessão
+$cliente_id = $_SESSION['id'] ?? null;
 
-// Aqui você pode formatar o telefone, se necessário. Exemplo de formatação simples:
-$telefone_formatado = preg_replace('/(\d{2})(\d{5})(\d{4})/', '($1) $2-$3', $telefone_usuario);
-
-if (isset($_SESSION['telefone'])) {
-    $telefone_usuario = $_SESSION['telefone'];
-    $telefone_formatado = preg_replace('/(\d{2})(\d{5})(\d{4})/', '($1) $2-$3', $telefone_usuario);
-} else {
-    $telefone_formatado = 'Telefone não disponível';  // Ou algum outro valor padrão
+if (!$cliente_id) {
+    echo "ID do usuário não encontrado na sessão.";
+    exit;
 }
 
- // Acessa as informações da sessão
- $nome_usuario = $_SESSION['usuario'];
- $cliente_id = $_SESSION['id'];
- 
-  // Consulta o saldo atualizado do usuário
- $sql = "SELECT saldo_usuario FROM usuario WHERE id_usuario = ?";
- $stmt = $conecta_db->prepare($sql);
- $stmt->bind_param("i", $cliente_id);
- $stmt->execute();
- $result = $stmt->get_result();
+// Função para fazer requisição GET à API e pegar dados do usuário
+function pegarDadosUsuarioAPI($cliente_id) {
+    $url = "http://localhost:8080/tostao/usuario/$cliente_id";
 
- if ($result->num_rows > 0) {
-     $row = $result->fetch_assoc();
-     $saldo_usuario = number_format($row['saldo_usuario'],2,',','.');
- } else {
-     echo "Usuário não encontrado.";
-     exit;
- }
+    $ch = curl_init($url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
- $stmt->close();
+    $response = curl_exec($ch);
+    $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    if ($httpcode === 200) {
+        return json_decode($response, true);
+    } else {
+        return null;
+    }
+}
+
+$dadosUsuario = pegarDadosUsuarioAPI($cliente_id);
+
+if (!$dadosUsuario) {
+    echo "Erro ao obter dados do usuário via API.";
+    exit;
+}
+
+// Extrai e formata os dados do usuário
+$nome = htmlspecialchars($dadosUsuario['nomeUsuario'] ?? 'Nome não disponível', ENT_QUOTES, 'UTF-8');
+$saldo = number_format($dadosUsuario['saldoUsuario'] ?? 0, 2, ',', '.');
+
+// Número do cartão vindo da API (melhor do que depender da sessão)
+$num_cartao = $dadosUsuario['cartaoUsuario'] ?? 'Número não disponível';
+
+// Formatação do número do cartão
+if (is_numeric($num_cartao)) {
+    $num_formatado = trim(chunk_split($num_cartao, 4, ' '));
+} else {
+    $num_formatado = 'Número de cartão inválido';
+}
+
+// Formatação do telefone
+if ($telefone_usuario && preg_match('/^\d{11}$/', $telefone_usuario)) {
+    $telefone_formatado = preg_replace('/(\d{2})(\d{5})(\d{4})/', '($1) $2-$3', $telefone_usuario);
+} else {
+    $telefone_formatado = 'Telefone não disponível';
+}
+
+// ----------- PROCESSO DE INVESTIR -----------
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $acao = $_POST['acao'] ?? null;
+    $valor = $_POST['valor'] ?? null;
+    $tipo_investimento = $_POST['tipo_investimento'] ?? null;
+
+    if (!$valor || !is_numeric($valor) || floatval($valor) <= 0) {
+        $erro = "Valor inválido.";
+    } elseif (!$tipo_investimento) {
+        $erro = "Tipo de investimento inválido.";
+    } elseif (!$email_usuario) {
+        $erro = "Usuário não autenticado.";
+    }
+
+    if (!isset($erro)) {
+        $dados_investimento = [
+            'valorInvestimento' => floatval($valor),
+            'tipoInvestimento' => $tipo_investimento,
+            'emailUsuario' => $email_usuario
+        ];
+
+        // Define a URL dependendo da ação
+        if ($acao === 'investir') {
+            $url = "http://localhost:8080/investimentos/investir";
+        } elseif ($acao === 'retirar') {
+            $url = "http://localhost:8080/investimentos/retirar";
+        } else {
+            $erro = "Ação inválida.";
+        }
+
+        if (!isset($erro)) {
+            $ch = curl_init($url);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($dados_investimento));
+            curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+
+            $response = curl_exec($ch);
+            $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            curl_close($ch);
+
+            if ($httpcode === 200 || $httpcode === 201) {
+                header("Location: confirmado.html");
+                exit;
+            } else {
+                $response_decoded = json_decode($response, true);
+                $mensagem_erro_api = $response_decoded['message'] ?? "Erro desconhecido";
+                $erro = "Erro ao realizar ação '$acao': $mensagem_erro_api (HTTP $httpcode)";
+            }
+        }
+    }
+}
+
+
 ?>
 
+
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
   <head>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
@@ -96,7 +171,7 @@ if (isset($_SESSION['telefone'])) {
                       <div class="container-3">
                         <div class="text">
                           <p class="hello"><span>Bem vindo,</span></p>
-                          <p class="fname"><span><?php echo $nome_usuario; ?></span></p>
+                          <p class="fname"><span><?php echo $nome; ?></span></p>
                         </div>
                       </div>
                     </div>
@@ -104,21 +179,18 @@ if (isset($_SESSION['telefone'])) {
                 </div>
                 <div class="balance-container">
                   <div class="balance-text">
-                    <p><span>Seu Saldo:</span></p>
+                    <p><span>Seus Trocados:</span></p>
                     <p>
-                      <span class="money"
-                        ><?php echo $saldo_usuario; ?>
-                        <span style="color: green; font-size: 50px"
-                          >$</span
-                        ></span
-                      >
+                      <span class="money">
+                        <span><span style="color: green; font-size: 25px">R$ </span><?php echo $saldo; ?></span>
+                      </span>
                     </p>
                   </div>
                 </div>
                 <div class="account-info">
                   <div class="info-text">
                     <p style="margin-bottom: 10px">
-                      <span style="font-size: 20px">Dados Conta</span>
+                      <span style="font-size: 20px">Dados do Pobre</span>
                   
                     <p><span>Email: <?php echo $email_usuario; ?></span></p>
                     <p><span>Celular: <?php echo $telefone_formatado; ?></span></p>
@@ -164,80 +236,88 @@ if (isset($_SESSION['telefone'])) {
 
                       <!-- Formulário de Investimento -->
                       <section id="investir">
-						<div class='container'>
-                          <form action="investimentos/investir.php" method="post">
-                              <label for="valor">Valor a Investir:</label>
-                              <input type="number" id="valor" name="valor" step="0.01" min="0" required>
-                              
-                              <label for="tipo_investimento">Tipo de Investimento:</label>
-
-									<select id="tipo_investimento" name="tipo_investimento" required>
-										<option value="Reserva de Emergência">Reserva de Emergência</option>
-										<option value="Fazer uma viagem">Fazer uma viagem</option>
-										<option value="Meu sonho de consumo">Meu sonho de consumo</option>
-									</select>
-
-                              <button type="submit" onclick="window.location.href='confirmado.html'">Investir</button>
+                        <div class='container'>
+                          <form method="post">
+                              <input type="hidden" name="acao" value="investir">
+                              <label>Valor a Investir:</label>
+                              <input type="number" name="valor" step="0.01" min="0.01" required>
+                              <label>Tipo de Investimento:</label>
+                              <select name="tipo_investimento" required>
+                                  <option value="Reserva de Emergência">Reserva de Emergência</option>
+                                  <option value="Fazer uma viagem">Fazer uma viagem</option>
+                                  <option value="Meu sonho de consumo">Meu sonho de consumo</option>
+                              </select>
+                              <button type="submit">Investir</button>
                           </form>
-						</div>
+                        </div>
                       </section>
 
                       <!-- Formulário de Retirada -->
                       <section id="retirar">
 						<div class='container'>
-                          <form action="investimentos/retirar.php" method="post">
-                              <label for="valor_retirar">Valor a Retirar:</label>
-                              <input type="number" id="valor_retirar" name="valor_retirar" step="0.01" min="0" required>
-
-                              <label for="tipo_investimento">Tipo de Investimento:</label>
-                              <select id="tipo_investimento" name="tipo_investimento" required>
-                                  <option value="Reserva de Emergência">Reserva de Emergência</option>
-                                  <option value="Fazer uma viagem">Fazer uma viagem</option>
-                                  <option value="Meu sonho de consumo">Meu sonho de consumo</option>
-                              </select>
-                              <button type="submit" onclick="window.location.href='confirmado.html'">Retirar</button>
-							<label for='valor_retirar'> Investimentos Realizados</label>
-						  </form>
+              <form method="post">
+                  <input type="hidden" name="acao" value="retirar">
+                  <label>Valor a Retirar:</label>
+                  <input type="number" name="valor" step="0.01" min="0.01" required>
+                  <label>Tipo de Investimento:</label>
+                  <select name="tipo_investimento" required>
+                      <option value="Reserva de Emergência">Reserva de Emergência</option>
+                      <option value="Fazer uma viagem">Fazer uma viagem</option>
+                      <option value="Meu sonho de consumo">Meu sonho de consumo</option>
+                  </select>
+                  <button type="submit">Retirar</button>
+              </form>
 						</div>
                       </section>  
+                      <!-- Tabela de Investimentos -->
+                      <?php
+                      // Suponha que $cliente_id esteja definido
 
+                      // URL da API para pegar investimentos do cliente
+                      $url = "http://localhost:8080/investimentos/investimento?email=$email_usuario";
 
-                                        <!-- Tabela de Investimentos -->
-                          <?php
-                          // Consultar investimentos do cliente
-                          $sql = "SELECT valor_investimento, tipo_investimento, data_investimento FROM investimento WHERE cliente_id = ?";
-                          $stmt = $conecta_db->prepare($sql);
+                      // Inicializa cURL
+                      $ch = curl_init($url);
+                      curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
-                          if ($stmt === false) {
-                              die("Erro na preparação da consulta: " . $conecta_db->error);
-                          }
+                      // Se precisar de autenticação, adicione aqui o cabeçalho, exemplo:
+                      // curl_setopt($ch, CURLOPT_HTTPHEADER, ['Authorization: Bearer seu_token']);
 
-                          $stmt->bind_param("i", $cliente_id);
-                          $stmt->execute();
-                          $result = $stmt->get_result();
+                      // Executa requisição
+                      $response = curl_exec($ch);
+                      $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+                      curl_close($ch);
 
-                          if ($result->num_rows > 0) {
-                              echo "<table border='1'>";
-                              echo "<tr><th>Tipo</th><th>Valor</th><th>Data</th></tr>";
+                      if ($httpcode !== 200) {
+                          echo "Erro ao acessar API de investimentos. Código HTTP: $httpcode";
+                          exit;
+                      }
 
-                              while ($row = $result->fetch_assoc()) {
-                                  echo "<tr>";
-                                  echo "<td>" . htmlspecialchars($row['tipo_investimento']) . "</td>";
-                                  echo "<td>R$ " . number_format($row['valor_investimento'], 2, ',', '.') . "</td>";
-                                  echo "<td>" . date("d/m/Y", strtotime($row['data_investimento'])) . "</td>";
-                                  echo "</tr>";
-                              }
+                      // Decodifica resposta JSON
+                      $investimentos = json_decode($response, true);
 
-                              echo "</table>";
-                          } else {
-                              echo "Nenhum investimento encontrado para este cliente.";
-                          }
+                      if (!$investimentos || count($investimentos) === 0) {
+                          echo "Nenhum investimento encontrado para este cliente.";                                     
+                      }else{
 
-                          $stmt->close();
-                          $conecta_db->close();
-                          ?>
+                        // Monta tabela HTML com os dados da API
+                        echo "<table border='1'>";
+                        echo "<tr><th>Tipo</th><th>Valor</th><th>Data</th></tr>";
 
+                        foreach ($investimentos as $inv) {
+                            $tipo = htmlspecialchars($inv['tipoInvestimento'] ?? 'N/A');
+                            $valor = number_format($inv['valorInvestimento'] ?? 0, 2, ',', '.');
+                            $data = isset($inv['dataInvestimento']) ? date("d/m/Y", strtotime($inv['dataInvestimento'])) : 'N/A';
 
+                            echo "<tr>";
+                            echo "<td>$tipo</td>";
+                            echo "<td>R$ $valor</td>";
+                            echo "<td>$data</td>";
+                            echo "</tr>";
+                        }
+                    }
+                      echo "</table>";
+                      ?>
                       </div>
                     </div>
                   </div>
@@ -260,15 +340,15 @@ if (isset($_SESSION['telefone'])) {
                           <img src="../resources/files/pics/chip.png" alt="" />
                         </div>
                         <div class="name">
-                          <p class="fname"><span><?php echo $nome_usuario; ?></span></p>
+                          <p class="fname"><span><?php echo $nome; ?></span></p>
                         </div>
                         <div class="card-num" id="card-number">
                           <p class="fname"><span><?php echo trim($num_formatado); ?></span></p>
                         </div>
                         <div class="card-exp-cvv">
                           <p>
-                            <span style="float: left">exp: 2024/07</span
-                            ><span style="float: right">cvv2: 999</span>
+                            <span style="float: left">exp: 2038/07</span
+                            ><span style="float: right">cvv: 999</span>
                           </p>
                         </div>
                       </div>
@@ -309,7 +389,17 @@ if (isset($_SESSION['telefone'])) {
                               <div class="text"><p>Caixinha</p></div>
                             </div>
                           </div>
-						  
+
+                          <!--Botão de Seguros-->
+                        <div class="option" onclick="window.location.href='dashboard-seguros.php'">
+                          <div class="container">
+                            <div class="logo">
+                              <img src="../resources/files/pics/seguros.svg" alt=""/>
+                            </div>
+                            <div class="text"><p>Seguros</p></div>
+                          </div>
+                        </div>
+                        
                           <div class="option" onclick="window.location.href='dashboard-recarga.php'">
                             <div class="container">
                               <div class="logo">
@@ -360,16 +450,13 @@ if (isset($_SESSION['telefone'])) {
                             </div>
                           </div>
 						  
-                          <div class="option" onclick="window.location.href='index.html'">
-                            <div class="container">
-                              <div class="logo">
-                                <img
-                                  src="../resources/files/pics/more.svg"
-                                  alt=""
-                                />
+                          <div class="option" onclick="window.location.href='dashboard.php?logout=true'">
+                              <div class="container">
+                                  <div class="logo">
+                                      <img src="../resources/files/pics/more.svg" alt="">
+                                  </div>
+                                  <div class="text"><p>Sair</p></div>
                               </div>
-                              <div class="text"><p>Sair</p></div>
-                            </div>
                           </div>
 						  
                         </div>

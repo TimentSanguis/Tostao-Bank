@@ -150,7 +150,7 @@ body .ham-menu #btn:hover {
 body .home-button #btn {
   width: 25px;
   position: absolute;
-  right: 42px;
+  right: 80px;
   top: 40px;
 }
 body .home-button #btn:hover {
@@ -158,12 +158,15 @@ body .home-button #btn:hover {
 }
 body main {
   height: 100vh;
-  background-image: url(../files/pics/bgtostao.jpg);
+  background-image: url(../files/pics/bgtostao.jpg); /* Substitua com o caminho correto da imagem */
+  background-size: cover; /* Faz a imagem cobrir a tela inteira */
+  background-position: center center; /* Centraliza a imagem de fundo */
+  background-attachment: fixed; /* A imagem fica fixa enquanto o conteúdo rola */
 }
 body main section .container .row .column-left {
   transition: all 0.3s;
   float: left;
-  width: 20%;
+  width: 18%;
   height: calc(100vh - 40px);
 }
 body main section .container .row .column-left section {
@@ -225,7 +228,7 @@ body main section .container .row .column-left section .balance-container .balan
 body main section .container .row .column-left section .balance-container .balance-text p .money {
   color: #2B178B;
   font-family: "Sora", sans-serif;
-  font-size: 50px;
+  font-size: 30px;
   font-weight: bold;
 }
 body main section .container .row .column-left section .account-info .info-text {
@@ -388,7 +391,7 @@ body main section .container .column-middle section .transaction .trans-containe
 body main section .container .column-middle section .transaction .trans-container .trans-info .container form .dollor-sign p span {
   position: absolute;
   margin-top: -40px;
-  margin-left: -40px;
+  margin-left: -45px;
   font-family: "Sora", sans-serif;
   color: green;
   font-size: 30px;
@@ -472,10 +475,15 @@ body main section .container .column-right {
 body main section .container .column-right section {
   background-color: #f0f0f0;
   margin: 20px;
-  min-height: 100%;
+  height: 100%;
   border-radius: 20px;
-  overflow: hidden;
+  overflow: scroll;
 }
+
+body main section .container .column-right section::-webkit-scrollbar{
+  display: none;
+}
+
 body main section .container .column-right section .card .card-container .title {
   text-align: center;
   background-image: linear-gradient(to top, #f0f0f0 1%, #301ca6 95%);
@@ -497,7 +505,7 @@ body main section .container .column-right section .card .card-container .title 
 body main section .container .column-right section .card .card-container .card-visual {
   position: relative;
   text-align: center;
-  margin-top: 17vh;
+  margin-top: 15vh;
 }
 body main section .container .column-right section .card .card-container .card-visual .card-pic {
   background-image: linear-gradient(to right top, #2B178B 20%, #552F72 80%, #8d4dbd);
@@ -551,10 +559,9 @@ body main section .container .column-right section .card .card-container .card-v
   font-family: "Sora", sans-serif;
 }
 body main section .container .column-right section .card .card-container .tools-container {
-  margin-top: 35vh;
+  margin-top: 42vh;
 }
 body main section .container .column-right section .card .card-container .tools-container .tools-row {
-  padding-top: 3vh;
   padding-left: 5%;
   padding-right: 5%;
 }
@@ -671,4 +678,99 @@ select{
 	font-weight: bold;
 	padding: 10px;
 	text-align: center;
+}
+
+.tabs {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.tab-button {
+  font-family: "Sora", sans-serif;
+  padding: 10px 20px;
+  background-color: #552F72;
+  border: none;
+  border-radius: 35px;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.tab-button:hover {
+  background-color: #8d4dbd;
+}
+
+.tab-content {
+  font-family: "Sora", sans-serif;
+  display: none;
+  background-color: white;
+  padding: 20px;
+  border-radius: 35px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  max-width: 700px;
+  margin: auto;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+#meusSeguros.tab-content {
+  background-color: transparent;
+  padding: 0px;
+  border: none;
+  margin: auto;
+  box-shadow: none;
+  
+  table {
+    border-radius: 20px;
+    font-family: "Sora", sans-serif;
+    text-align: center;
+    border-collapse: collapse;
+    border: none;
+    margin: 20px auto;
+    background-color: transparent;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  }
+  
+  th, td {
+    padding: 10px;
+  }
+  
+  th {
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+    text-align: center;
+    width: 40%;
+    font-family: "Sora", sans-serif;
+    color: #f0f0f0;
+    font-size: 20px;
+    background-color: #2B178B;
+    color: white;
+  }
+  
+  tr:nth-child(even) {
+    background-color: #EEEFEE;
+  }
+  
+  tr:hover {
+    background-color: #f1f1f1;
+  }
+  td h3 {
+    margin: 0;
+    color: black;
+  }
+}
+
+.mensagem {
+  margin-top: 10px;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-family: "Sora", sans-serif;
+  font-size: 14px;
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
 }

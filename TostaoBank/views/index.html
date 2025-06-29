@@ -1,109 +1,142 @@
-<html>
-  <head>
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
     <meta charset="UTF-8">
-	<link rel="icon" type="image/x-icon" href="../resources/files/pics/logo_tostao_bank.png"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tostão</title>
+    <link rel="icon" type="image/x-icon" href="../resources/files/pics/logo_tostao_bank.ico"/>
     <link rel="stylesheet" href="../resources/css/Index.css">
-  </head>
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@100..800&display=swap" rel="stylesheet">
+    <link href="https://unpkg.com/aos@2.3.4/dist/aos.css" rel="stylesheet" />
+</head>
+<body>
+    <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
+    <script>
+        AOS.init({
+            once: false, // muda para true se quiser animar só uma vez
+            mirror: true // ativa a reversão quando voltar a subir
+        });
+    </script>
 
-  <body>
-    <div class="header" id="header">
-      <button onclick="toggleSideBar()" class="btn_icon_header">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-list" viewBox="0 0 16 16">
-          <path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5"/>
-        </svg>
-      </button>
-      <textoG>Tostão Bank</textoG>
-      <div onclick="toggleSideBar()" class="headerNav" id="headerNav">
-        <button class="btn_icon_header">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-x" viewBox="0 0 16 16">
-            <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>
-          </svg>
-        </button>
-        <a href="index.html" class="ativo">Início</a>
-        <a href="login.php">Login</a>
+        <!-- Tela de boas-vindas -->
+    <div id="welcome-screen" class="screen active">
+        <h1>Bem-vindo ao Tostão Bank</h1>
+    </div>
+
+    <header>
+    <img id="logo" src="../resources/files/pics/logo_tostao_bank.png" alt="Tostão Bank">
+
+    <h1 id="titulo">Tostão Bank</h1>
+
+    <button id="openMenu">&#9776;</button>
+
+    <nav id="menu">
+        <button id="closeMenu">X</button>
+        <a href="login.php">Login</a>        
         <a href="cadastro.php">Criar conta</a>
-      </div>
+        <a href="#container3">Sobre Nós</a>
+        <!--FAZER O BOTAO DE CLARO E ESCURO-->
+    </nav>
+    </header>
+
+    <div id="conteudo">
+        <div id="container1">
+            <aside id="aside1">
+                <picture class="img-aside1">
+                    <source media="(max-width: 750px)" srcset="../resources/files/pics/mexendoCel300.png" type="image/png">
+                    <source media="(max-width: 1050px)" srcset="../resources/files/pics/mexendoCel700.png" type="image/png">
+                    <img src="../resources/files/pics/mexendoCel700.png" alt="imagem flexível">
+                </picture>
+            </aside>
+            <main>
+                <section class="sobre1">
+                    <h1 class="titulo-section1">Sobre o Banco</h1>
+                    <div class="conteudo-section1">
+                        <p class="texto-section1">
+                            O Tostão Bank é uma instituição financeira dedicada a revolucionar o acesso bancário para pessoas de baixa renda.
+                            No Tostão Bank, acreditamos que a tecnologia pode e deve ser uma aliada na construção de uma sociedade mais justa e igualitária.
+                        </p>
+                        <picture class="img-section1">
+                            <source media="(max-width: 750px)" srcset="../resources/files/pics/moeda-128.png" type="image/png">
+                            <source media="(max-width: 1050px)" srcset="../resources/files/pics/moeda-256.png" type="image/png">
+                            <img src="../resources/files/pics/moeda-256.png" alt="imagem flexível">
+                        </picture>
+                    </div>
+                </section>
+            </main>
+        </div>
+        <div id="missao" data-aos="fade-up">
+            <p>
+                Nossa missão é empoderar indivíduos e comunidades,
+                oferecendo ferramentas financeiras que facilitam a gestão do dinheiro e promovem a
+                independência financeira!
+            </p>
+        </div>
+        <div id="container2">
+            <main>
+                <section class="sobre2">
+                    <h1 class="titulo-section2">Acesso Fácil ao Banco</h1>
+                    <div class="conteudo-section2" data-aos="fade-up">
+                        <p class="texto-section2">
+                            Por isso, desenvolvemos produtos e serviços inovadores, atendendo às necessidades específicas desse público, garantindo que todos possam ter acesso a serviços bancários de qualidade, de forma simples e eficiente.
+                        </p>
+                        <picture class="img-section2">
+                            <source media="(max-width: 750px)" srcset="../resources/files/pics/moeda-128.png" type="image/png">
+                            <source media="(max-width: 1050px)" srcset="../resources/files/pics/moeda-256.png" type="image/png">
+                            <img src="../resources/files/pics/moeda-256.png" alt="imagem flexível">
+                        </picture>
+                    </div>
+                </section>
+            </main>
+            <aside id="aside2">
+                <picture class="img-aside2">
+                    <source media="(max-width: 750px)" srcset="../resources/files/pics/PersonCel2.png" type="image/png">
+                    <source media="(max-width: 1050px)" srcset="../resources/files/pics/PersonCel2.png" type="image/webp">
+                    <img src="../resources/files/pics/PersonCel2.png" alt="imagem flexível">
+                </picture>
+            </aside>
+        </div>
+        <div id="cartao">
+            <section id="sobre4" data-aos="fade-up">
+                <p class="texto-section4">
+                    Com o cartão Tostão, você tem controle total sobre seus gastos, segurança nas suas transações e a praticidade de um banco 100% digital. Moderno, prático e feito para o seu dia a dia.
+                </p>
+            </section>
+            <aside>
+                <picture class="img-aside4" data-aos="fade-up">
+                    <img src="../resources/files/pics/cartao_tostao.png" alt="Cartão Tostão">
+                </picture>
+            </aside>
+        </div>
+        <div id="container3">
+            <aside>
+                <picture class="img-aside3">
+                    <source media="(max-width: 750px)" srcset="../resources/files/pics/logo_tostao_bank.png" type="image/png">
+                    <source media="(max-width: 1050px)" srcset="../resources/files/pics/logo_tostao_bank.png" type="image/png">
+                    <img src="../resources/files/pics/logo_tostao_bank.png" alt="imagem flexível">
+                </picture>
+            </aside>
+            <main>
+                <section class="sobre3">
+                    <h1 class="titulo-section3">Sobre Nós</h1>
+                    <div class="conteudo-section3">
+                        <p class="texto-section3" data-aos="fade-up">
+                            Bem-vindo à página do Banco Digital desenvolvido pelo talentoso grupo do 2º semestre do curso de Desenvolvimento de Software Multiplataforma da FATEC Mauá.
+                            Somos apaixonados por tecnologia e inovação, e unimos nossos conhecimentos para criar uma experiência bancária digital única e acessível para todos.
+                            Nossa equipe é composta por mentes criativas e dedicadas, comprometidas em fornecer soluções de alta qualidade.
+                            Com habilidades em programação, design de interface e análise de sistemas, trabalhamos incansavelmente para oferecer uma plataforma intuitiva, segura e eficiente para nossos usuários.
+                        </p>
+                    </div>
+                </section>
+            </main>
+        </div>
+
     </div>
 
-    <div tabindex="0" onclick="closeSideBar()" class="content" id="content">
-      <TextoM>Bem-vindo ao Tostão Bank!</TextoM><br><br><br><br><br><br>
-      <h1>Sobre o Banco</h1>
-      <div class="container" id="container">
-        <img src="../resources/files/pics/mexendoCel.png" id="imgEsquerda">
-        <p>
-          <h2>O Tostão Bank é uma instituição financeira dedicada a revolucionar o acesso bancário para pessoas de baixa renda.<br>
-            No Tostão Bank, acreditamos que a tecnologia pode e deve ser uma aliada na construção de uma sociedade mais justa e igualitária.</h2>
-        </p>
-      </div>
+    <footer>© Tostão Bank 2025</footer>
 
-      <div class="curved top">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 130 1440 170">
-          <path fill="#EEEFEE" fill-opacity="1" d="M0,224L80,229.3C160,235,320,245,480,234.7C640,224,800,192,960,186.7C1120,181,1280,203,1360,213.3L1440,224L1440,320L1360,320C1280,320,1120,320,960,320C800,320,640,320,480,320C320,320,160,320,80,320L0,320Z"></path>
-        </svg>
-      </div>
+    <script src="../resources/js/index.js"></script>
+    <script src="../resources/js/load.js"></script>
 
-      <div class="curved">
-        <h1><b>Nossa missão é empoderar indivíduos e comunidades, <br>oferecendo ferramentas financeiras que facilitam a gestão do dinheiro e promovem a <br>independência financeira!</b></h1>
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 130 1440 170">
-          <path fill="#0F0840" fill-opacity="1" d="M0,224L80,229.3C160,235,320,245,480,234.7C640,224,800,192,960,186.7C1120,181,1280,203,1360,213.3L1440,224L1440,320L1360,320C1280,320,1120,320,960,320C800,320,640,320,480,320C320,320,160,320,80,320L0,320Z"></path>
-        </svg>
-      </div>
-
-      <div class="container" id="container">
-        <h2>Por isso, desenvolvemos produtos e serviços inovadores, atendendo às necessidades específicas desse público, garantindo que todos possam ter acesso a serviços bancários de qualidade, de forma simples e eficiente.</h2>
-        <img src="../resources/files/pics/abestadoCel.webp" id="imgDireita">
-      </div>
-      <br><br>
-
-      <div class="header2"></div><br><br>
-
-      <h1>Sobre Nós</h1><br><br>
-      <h2>Bem-vindo à página do Banco Digital desenvolvido pelo talentoso grupo do 2º semestre do curso de Desenvolvimento de Software Multiplataforma da FATEC Mauá. <br>
-        Somos apaixonados por tecnologia e inovação, e unimos nossos conhecimentos para criar uma experiência bancária digital única e acessível para todos.</h2>
-      <br><br>
-
-      <h2>Nossa equipe é composta por mentes criativas e dedicadas, comprometidas em fornecer soluções de alta qualidade.<br>
-        Com habilidades em programação, design de interface e análise de sistemas, trabalhamos incansavelmente para oferecer uma plataforma intuitiva, segura e eficiente para nossos usuários.</h2>
-      <br><br>
-      <!-- <h2>Conheça Nossa Equipe:</h2>
-      <br><br>
-      <img src="../resources/files/pics/bobEmo.png"><br><br> -->
-
-      <div class="footer" id="footer">
-        <h5>&#169; Copyright 2024</h5>
-      </div>
-    </div>
-  </body>
-
-  <script>
-    var header = document.getElementById('header');
-    var nav = document.getElementById('headerNav');
-    var content = document.getElementById('content');
-    var showSideBar = false;
-
-    function toggleSideBar(){
-      showSideBar = !showSideBar;
-      if(showSideBar){
-        headerNav.style.marginLeft = '-10vw';
-        headerNav.style.animationName = 'showSideBar';
-        content.style.filter = 'blur(2px)';
-      } else {
-        headerNav.style.marginLeft = '-100vw';
-        headerNav.style.animationName = '';
-        content.style.filter = '';
-      }
-    }
-
-    function closeSideBar(){
-      if(showSideBar){
-        toggleSideBar();
-      }
-    }
-
-    window.addEventListener('resize', function(event) {
-      if(window.innerWidth > 700 && showSideBar){
-        toggleSideBar();
-      }
-    });
-  </script>
+</body>
 </html>

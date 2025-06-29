@@ -1,6 +1,4 @@
 <?php
-include '../php/conexao.php';
-
 session_start();
 
 // Verifica se o usuário está logado
@@ -9,87 +7,129 @@ if (!isset($_SESSION['usuario'])) {
     exit;
 }
 
-// Acessa as informações da sessão
 $nome_usuario = $_SESSION['usuario'];
 $email_usuario = $_SESSION['email'];
 $saldo_usuario = $_SESSION['saldo'];
 $cliente_id = $_SESSION['id'];
 $hoje = date('Y-m-d H:i:s');
 
-// Verificar se o cliente existe
-$sql = "SELECT * FROM usuario WHERE id_usuario = ?";
-$stmt = $conecta_db->prepare($sql);
-$stmt->bind_param("i", $cliente_id);
-$stmt->execute();
-$result = $stmt->get_result();
-
 $desc = "Retirada";
 
-if ($result->num_rows == 0) {
-    die("Cliente não encontrado.");
+function callAPI($method, $url, $data = false) {
+    $curl = curl_init();
+
+    switch ($method) {
+        case "POST":
+            curl_setopt($curl, CURLOPT_POST, 1);
+            if ($data)
+                curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($data));
+            break;
+
+        case "PUT":
+            curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "PUT");
+            if ($data)
+                curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($data));
+            break;
+
+        case "DELETE":
+            curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "DELETE");
+            if ($data)
+                curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($data));
+            break;
+
+        default:
+            // Para GET e outros, adiciona query string só se $data for um array ou algo válido
+            if ($data && is_array($data)) {
+                $url = sprintf("%s?%s", $url, http_build_query($data));
+            }
+            break;
+    }
+
+    curl_setopt($curl, CURLOPT_URL, $url);
+    curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($curl, CURLOPT_HTTPHEADER, [
+        'Content-Type: application/json',
+        //'Authorization: Bearer ' . $_SESSION['token'] // Se usar token
+    ]);
+
+    $result = curl_exec($curl);
+    if (!$result) {
+        die("Erro ao acessar API: " . curl_error($curl));
+    }
+    curl_close($curl);
+    return json_decode($result, true);
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $valor_retirar = $_POST['valor_retirar'];
+    $valor_retirar = floatval($_POST['valor_retirar']);
     $tipo = $_POST['tipo_investimento'];
-    
 
-    // Consultar o investimento específico do cliente
-    $sql = "SELECT valor_investimento FROM investimento WHERE cliente_id = ? AND tipo_investimento = ?";
-    $stmt = $conecta_db->prepare($sql);
-    $stmt->bind_param("is", $cliente_id, $tipo);
-    $stmt->execute();
-    $result = $stmt->get_result();
+    // 1. Verifica investimento do cliente e tipo via API
+    $investimento = callAPI("GET", "http://localhost:8080/tostao/investir", [
+        "cliente_id" => $cliente_id,
+        "tipo_investimento" => $tipo
+    ]);
 
-    if ($result->num_rows > 0) {
-        $row = $result->fetch_assoc();
-        $valor_investido = $row['valor_investimento'];
-
-        // Verificar se o cliente pode retirar o valor
-        if ($valor_retirar <= $valor_investido) {
-            // Atualizar o saldo do cliente
-            $novo_saldo = $saldo_usuario + $valor_retirar;
-            $update_sql = "UPDATE usuario SET saldo_usuario = ? WHERE id_usuario = ?";
-            $update_stmt = $conecta_db->prepare($update_sql);
-            $update_stmt->bind_param("di", $novo_saldo, $cliente_id);
-            $update_stmt->execute();
-
-            // Atualizar ou remover o investimento
-            $novo_valor = $valor_investido - $valor_retirar;
-            if ($novo_valor > 0) {
-                // Atualiza o valor do investimento existente
-                $update_investimento_sql = "UPDATE investimento SET valor_investimento = ? WHERE cliente_id = ? AND tipo_investimento = ?";
-                $update_investimento_stmt = $conecta_db->prepare($update_investimento_sql);
-                $update_investimento_stmt->bind_param("dis", $novo_valor, $cliente_id, $tipo);
-                $update_investimento_stmt->execute();
-            } else {
-                // Remove o investimento se o valor se tornar zero
-                $delete_investimento_sql = "DELETE FROM investimento WHERE cliente_id = ? AND tipo_investimento = ?";
-                $delete_investimento_stmt = $conecta_db->prepare($delete_investimento_sql);
-                $delete_investimento_stmt->bind_param("is", $cliente_id, $tipo);
-                $delete_investimento_stmt->execute();
-            }
-
-            // Atualizar saldo na sessão
-            $_SESSION['saldo'] = $novo_saldo;
-
-            header('Location: ../confirmado.html');
-            $insertHist = $conecta_db->prepare("INSERT INTO historico (data_Transferencia, valor_Transferencia, email_Transferencia, tipo_Transferencia, desc_transferencia) VALUES (?, ?, ?, ?, ?)");
-            $insertHist->bind_param("sdsss", $hoje, $valor_retirar, $email_usuario, $tipo, $desc );
-            $insertHist->execute();
-        } else {
-            echo "Valor de retirada maior do que o valor investido.";
-        }
-    } else {
-        echo "Nenhum investimento encontrado para este tipo.";
+    if (!$investimento || !isset($investimento['valor_investimento'])) {
+        die("Nenhum investimento encontrado para este tipo.");
     }
 
-    // Fechar as instruções
-    $stmt->close();
-    if (isset($update_stmt)) $update_stmt->close();
-    if (isset($update_investimento_stmt)) $update_investimento_stmt->close();
-    if (isset($delete_investimento_stmt)) $delete_investimento_stmt->close();
-}
+    $valor_investido = floatval($investimento['valor_investimento']);
 
-$conecta_db->close();
+    if ($valor_retirar <= $valor_investido) {
+        // 2. Atualiza saldo do cliente (soma o valor da retirada)
+        $novo_saldo = $saldo_usuario + $valor_retirar;
+        $updateSaldo = callAPI("PUT", "http://localhost:8080/tostao/$cliente_id/saldo", [
+            "saldo" => $novo_saldo
+        ]);
+
+        if (!$updateSaldo || !isset($updateSaldo['success']) || !$updateSaldo['success']) {
+            die("Falha ao atualizar saldo.");
+        }
+
+        // 3. Atualiza investimento (diminui ou remove)
+        $novo_valor = $valor_investido - $valor_retirar;
+
+        if ($novo_valor > 0) {
+            $updateInvestimento = callAPI("PUT", "http://localhost:8080/tostao/retirar", [
+                "cliente_id" => $cliente_id,
+                "tipo_investimento" => $tipo,
+                "valor_investimento" => $novo_valor
+            ]);
+            if (!$updateInvestimento || !isset($updateInvestimento['success']) || !$updateInvestimento['success']) {
+                die("Falha ao atualizar investimento.");
+            }
+        } else {
+            $deleteInvestimento = callAPI("DELETE", "http://localhost:8080/tostao/investir", [
+                "cliente_id" => $cliente_id,
+                "tipo_investimento" => $tipo
+            ]);
+            if (!$deleteInvestimento || !isset($deleteInvestimento['success']) || !$deleteInvestimento['success']) {
+                die("Falha ao deletar investimento.");
+            }
+        }
+
+        // 4. Atualiza saldo na sessão
+        $_SESSION['saldo'] = $novo_saldo;
+
+        // 5. Registra histórico da transação
+        $insertHist = callAPI("POST", "http://localhost:8080/tostao/historico", [
+            "data_Transferencia" => $hoje,
+            "valor_Transferencia" => $valor_retirar,
+            "email_Transferencia" => $email_usuario,
+            "tipo_Transferencia" => $tipo,
+            "desc_transferencia" => $desc
+        ]);
+
+        if (!$insertHist || !isset($insertHist['success']) || !$insertHist['success']) {
+            die("Falha ao registrar histórico.");
+        }
+
+        // Redireciona após sucesso
+        header('Location: ../confirmado.html');
+        exit;
+    } else {
+        echo "Valor de retirada maior do que o valor investido.";
+    }
+}
 ?>

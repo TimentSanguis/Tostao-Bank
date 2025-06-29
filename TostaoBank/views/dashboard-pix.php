@@ -1,57 +1,109 @@
 <?php
-include 'php/conexao.php';
+session_start();
 
-session_start(); // Inicia a sessão
-
-date_default_timezone_set('America/Sao_Paulo');
-
-// Verifica se o usuário está logado
 if (!isset($_SESSION['usuario'])) {
-    header("Location: login.php"); // Redireciona para o login se não estiver logado
+    header("Location: login.php");
     exit;
 }
 
-// Acessa as informações da sessão
-$nome_usuario = htmlspecialchars($_SESSION['usuario'], ENT_QUOTES, 'UTF-8');
-$saldo_usuario = number_format($_SESSION['saldo'], 2, ',', '.');
-$email_usuario = htmlspecialchars($_SESSION['email'], ENT_QUOTES, 'UTF-8');
-$telefone_usuario = $_SESSION['telefone'];
-$num_cartao = isset($_SESSION['num_cartao']) ? $_SESSION['num_cartao'] : "Número de cartão não disponível";
-$num_formatado = preg_replace('/(\d{4})/', '$1   ', $num_cartao); // Divide em blocos de 4 separados por espaço
+$email_sessao = $_SESSION['email'];
+$apiBaseUrl = 'http://localhost:8080/tostao';
 
-// Aqui você pode formatar o telefone, se necessário. Exemplo de formatação simples:
-$telefone_formatado = preg_replace('/(\d{2})(\d{5})(\d{4})/', '($1) $2-$3', $telefone_usuario);
-
-if (isset($_SESSION['telefone'])) {
-    $telefone_usuario = $_SESSION['telefone'];
-    $telefone_formatado = preg_replace('/(\d{2})(\d{5})(\d{4})/', '($1) $2-$3', $telefone_usuario);
-} else {
-    $telefone_formatado = 'Telefone não disponível';  // Ou algum outro valor padrão
+function apiGetRequest($url) {
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+    $response = curl_exec($ch);
+    if (curl_errno($ch)) {
+        curl_close($ch);
+        return false;
+    }
+    curl_close($ch);
+    return json_decode($response, true);
 }
 
- $nome_usuario = $_SESSION['usuario'];
- $cliente_id = $_SESSION['id'];
-  // Consulta o saldo atualizado do usuário
- $sql = "SELECT saldo_usuario FROM usuario WHERE id_usuario = ?";
- $stmt = $conecta_db->prepare($sql);
- $stmt->bind_param("i", $cliente_id);
- $stmt->execute();
- $result = $stmt->get_result();
+// ======================
+// Tratamento do PIX
+// ======================
+$valor = 0.0;
+$mensagem = '';
+$sucesso = false;
 
- if ($result->num_rows > 0) {
-     $row = $result->fetch_assoc();
-     $saldo_usuario = number_format($row['saldo_usuario'],2,',','.');
- } else {
-     echo "Usuário não encontrado.";
-     exit;
- }
+// Variáveis de resposta
+$mensagem = '';
+$sucesso = false;
 
- $stmt->close();
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $emailRemetente = $_SESSION['email'] ?? '';
+    $valorInput = $_POST['valor'] ?? '';
+    $emailDestino = $_POST['email_destino'] ?? ''; // Corrigido: nome correto do campo vindo do formulário
 
+    // Validação simples
+    $valorLimpo = str_replace(['.', ','], ['', '.'], $valorInput);
+    $valor = floatval($valorLimpo);
+
+    if ($valor > 0 && filter_var($emailDestino, FILTER_VALIDATE_EMAIL) && !empty($emailRemetente)) {
+        $data = [
+            "email" => $emailRemetente,
+            "valor" => $valor,
+            "emailRecebe" => $emailDestino
+        ];
+
+        $payload = json_encode($data);
+
+        $ch = curl_init($apiBaseUrl . "/pix");
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Content-Type: application/json',
+            'Content-Length: ' . strlen($payload)
+        ]);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+
+        $response = curl_exec($ch);
+        $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+        if (curl_errno($ch)) {
+            $mensagem = 'Erro na conexão com a API: ' . curl_error($ch);
+        } else {
+            if ($http_code === 200) {
+                $sucesso = true;
+                $mensagem = 'Transferência realizada com sucesso!';
+                header("Location: confirmado.html");
+            } elseif ($http_code === 400) {
+                $mensagem = 'Erro: Saldo insuficiente.';
+            } elseif ($http_code === 404) {
+                $mensagem = 'Erro: Usuário não encontrado.';
+            } else {
+                $mensagem = 'Erro na transferência. Código: ' . $http_code;
+            }
+        }
+
+        curl_close($ch);
+    } else {
+        $mensagem = 'Preencha corretamente todos os campos.';
+    }
+
+}
+
+// ======================
+// Obter dados do usuário
+// ======================
+$userData = apiGetRequest($apiBaseUrl . "/usuario?email=" . urlencode($email_sessao));
+
+$nome_usuario = isset($userData['nomeUsuario']) ? htmlspecialchars($userData['nomeUsuario']) : 'Usuário';
+$saldo_usuario = isset($userData['saldoUsuario']) && is_numeric($userData['saldoUsuario']) ? number_format($userData['saldoUsuario'], 2, ',', '.') : '0,00';
+$email_usuario = isset($userData['emailUsuario']) ? htmlspecialchars($userData['emailUsuario']) : '';
+$telefone_usuario = isset($userData['telefoneUsuario']) ? (string)$userData['telefoneUsuario'] : '';
+$num_cartao = isset($userData['cartaoUsuario']) ? (string)$userData['cartaoUsuario'] : "Número de cartão não disponível";
+$num_formatado = preg_replace('/(\d{4})/', '$1   ', $num_cartao);
+
+$telefone_formatado = $telefone_usuario ? preg_replace('/(\d{2})(\d{5})(\d{4})/', '($1) $2-$3', $telefone_usuario) : '';
 ?>
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
   <head>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
@@ -104,17 +156,18 @@ if (isset($_SESSION['telefone'])) {
                 </div>
                 <div class="balance-container">
                   <div class="balance-text">
-                    <p><span>Seu Saldo:</span></p>
-                    <p>
-                      <span id="saldoValue" class="money"><?php echo $saldo_usuario; ?> </span>
-						<span id="saldoValue" class="money" style="color: green; font-size: 50px">$</span>
-                    </p>
+                    <p><span>Seus Trocados:</span></p>
+                      <p>
+                        <span class="money">
+                          <span><span style="color: green; font-size: 25px">R$ </span><?php echo $saldo_usuario; ?></span>
+                        </span>
+                      </p>
                   </div>
                 </div>
                 <div class="account-info">
                   <div class="info-text">
                     <p style="margin-bottom: 10px">
-                      <span style="font-size: 20px">Dados Conta</span>
+                      <span style="font-size: 20px">Dados do Pobre</span>
                     </p>
                     <p><span>Email: <?php echo $email_usuario; ?></span></p>
                     <p><span>Celular: <?php echo $telefone_formatado; ?></span></p> <!-- Exibindo o telefone formatado -->
@@ -131,16 +184,26 @@ if (isset($_SESSION['telefone'])) {
                     </div>
                     <div class="trans-info">
                       <div class="container">
-                        <form id="pixForm">
-                          <label for="amount">Valor transferência</label>
-                          <input type="text" id="money" name="txt_number" oninput="limitarDecimais(event)" required />
-                          <div class="dollor-sign">
+                      <form id="pixForm" method="POST">
+                        <label for="money">Valor transferência</label>
+                        <input type="text" id="money" name="valor" oninput="limitarDecimais(event)" required />
+                        
+                        <div class="dollor-sign">
                           <p><span>$</span></p>
+                        </div>
+                        
+                        <label for="card-num">Chave Pix</label>
+                        <input type="email" id="card-num" name="email_destino" placeholder="abc@gmail.com" required />
+                        
+                        <button type="submit">Transferir</button>
+
+                        <?php if (!empty($mensagem)): ?>
+                          <div class="mensagem <?php echo $sucesso ? 'sucesso' : 'erro'; ?>">
+                            <?php echo htmlspecialchars($mensagem); ?>
                           </div>
-                          <label for="card-num">Chave Pix</label>
-                          <input type="email" id="card-num" name="txt_usuario" placeholder="abc@gmail.com" required />
-                          <button type="submit">Transferir</button>
-                        </form>
+                        <?php endif; ?>
+                        
+                      </form>
                       </div>
                     </div>
                   </div>
@@ -170,8 +233,8 @@ if (isset($_SESSION['telefone'])) {
                         </div>
                         <div class="card-exp-cvv">
                           <p>
-                            <span style="float: left">exp: 2024/07</span
-                            ><span style="float: right">cvv2: 999</span>
+                            <span style="float: left">exp: 2038/07</span
+                            ><span style="float: right">cvv: 999</span>
                           </p>
                         </div>
                       </div>
@@ -188,6 +251,7 @@ if (isset($_SESSION['telefone'])) {
                                   alt=""
                                 />
                               </div>
+                              
                               <div class="text"><p>Pix</p></div>
                             </div>
                           </div>
@@ -199,6 +263,17 @@ if (isset($_SESSION['telefone'])) {
                               <div class="text"><p>Caixinha</p></div>
                             </div>
                           </div>
+
+                          <!--Botão de Seguros-->
+                        <div class="option" onclick="window.location.href='dashboard-seguros.php'">
+                          <div class="container">
+                            <div class="logo">
+                              <img src="../resources/files/pics/seguros.svg" alt=""/>
+                            </div>
+                            <div class="text"><p>Seguros</p></div>
+                          </div>
+                        </div>
+                        
                           <div class="option" onclick="window.location.href='dashboard-recarga.php'">
                             <div class="container">
                               <div class="logo">
@@ -234,13 +309,13 @@ if (isset($_SESSION['telefone'])) {
                               <div class="text"><p>Desativar conta</p></div>
                             </div>
                           </div>
-                          <div class="option" onclick="window.location.href='index.html'">
-                            <div class="container">
-                              <div class="logo">
-                                <img src="../resources/files/pics/more.svg" alt="">
+                          <div class="option" onclick="window.location.href='dashboard.php?logout=true'">
+                              <div class="container">
+                                  <div class="logo">
+                                      <img src="../resources/files/pics/more.svg" alt="">
+                                  </div>
+                                  <div class="text"><p>Sair</p></div>
                               </div>
-                              <div class="text"><p>Sair</p></div>
-                            </div>
                           </div>
                         </div>
                       </div>
@@ -255,79 +330,57 @@ if (isset($_SESSION['telefone'])) {
     </main>
     <footer></footer>
     <script src="../resources/js/dashboard-js.js" defer></script>
-	<script>
-		function limitarDecimais(event) {
-        let valor = event.target.value;
-        let partes = valor.split(",");
-        if (partes.length === 2 && partes[1].length > 2) {
-            event.target.value = partes[0] + "," + partes[1].substring(0, 2);
-        }
+<script>
+  function limitarDecimais(event) {
+    let valor = event.target.value;
+    let partes = valor.split(",");
+    if (partes.length === 2 && partes[1].length > 2) {
+      event.target.value = partes[0] + "," + partes[1].substring(0, 2);
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", function() {
+    // Limitar decimais no input txt_valor (exemplo: id="charge")
+    const valorInput = document.getElementById('charge');
+    if (valorInput) {
+      valorInput.addEventListener('input', limitarDecimais);
     }
 
-    document.addEventListener("DOMContentLoaded", function() {
-        const toggleSaldoButton = document.getElementById('toggleSaldo');
-        const saldoDisplay = document.getElementById('saldoDisplay');
-        const saldoValue = document.getElementById('saldoValue');
+    const saldoValue = document.getElementById('saldoValue');
+    const saldoDisplay = document.getElementById('saldoDisplay'); // Se existir na sua página
 
-        document.getElementById('pixForm').addEventListener('submit', function(e) {
-            e.preventDefault(); // Impede o envio normal do formulário
-	
-            const formData = new FormData(this);
-            fetch('pagar_pix_ajax.php', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                // Atualiza a mensagem na página
-                document.getElementById('mensagem').innerHTML = data.mensagem;
-				
+    // Função para atualizar saldo via fetch
+    function atualizarSaldo() {
+      fetch('php/obter_saldo.php')
+      .then(response => {
+        if (!response.ok) throw new Error('Resposta inválida da rede');
+        return response.json();
+      })
+      .then(data => {
+        if (data.saldo) {
+          saldoValue.innerHTML = data.saldo;
+          if (saldoDisplay) saldoDisplay.innerHTML = `Seu saldo: R$ ${data.saldo}`;
+        } else if (data.erro) {
+          console.error(data.erro);
+        }
+      })
+      .catch(error => console.error('Erro ao atualizar saldo:', error));
+    }
 
-                // Atualiza o saldo na tela se a transferência for bem-sucedida
-                if (data.saldo) {
-                    saldoValue.innerHTML = data.saldo;
-                    saldoDisplay.innerHTML = `Seu saldo: R$ ${data.saldo}`;
-                }
-            })
-            .catch(error => {
-                console.error('Erro:', error);
-				});
-				window.location.href = 'confirmado.html';
-			});
+    // Atualiza saldo a cada 10 segundos
+    setInterval(atualizarSaldo, 10000);
 
-			// Função para atualizar o saldo via AJAX
-			function atualizarSaldo() {
-				fetch('php/obter_saldo.php')
-					.then(response => {
-						if (!response.ok) {
-							throw new Error('Network response was not ok');
-						}
-						return response.json();
-					})
-					.then(data => {
-						if (data.saldo) {
-							saldoValue.innerHTML = data.saldo;
-							saldoDisplay.innerHTML = `Seu saldo: R$ ${data.saldo}`;
-						} else if (data.erro) {
-							console.error(data.erro);
-						}
-					})
-					.catch(error => {
-						console.error('Erro:', error);
-					});
-			}
-	
-  const optionElement = document.querySelector('#copy-card');
-  optionElement.addEventListener('click', () => {
-  const text = document.querySelector('#card-number').textContent;
-  navigator.clipboard.writeText(text);
-
-  alert('Copiado para área de tranfêrencia!');
-});
-
-			// Chama a função para atualizar o saldo periodicamente (a cada 10 segundos)
-			setInterval(atualizarSaldo, 1000);
-		});
-		</script>
+    // Copiar número do cartão ao clicar no botão
+    const optionElement = document.querySelector('#copy-card');
+    if (optionElement) {
+      optionElement.addEventListener('click', () => {
+        const text = document.querySelector('#card-number').textContent.trim();
+        navigator.clipboard.writeText(text)
+          .then(() => alert('Copiado para área de transferência!'))
+          .catch(() => alert('Falha ao copiar o texto.'));
+      });
+    }
+  });
+</script>
 	</body>
 </html>

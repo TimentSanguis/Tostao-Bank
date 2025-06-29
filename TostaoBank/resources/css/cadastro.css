@@ -204,7 +204,7 @@ button:hover {
 	float: right;
 }
 
-#usuario,#email,#senha,#nascimento,#cpf,#telefone,#endereco,#renda {
+#usuario,#email,#senha,#confirma_senha,#nascimento,#cpf,#telefone,#estado,#endereco,#renda {
     width: 350px;
     height: 30px;
     border-radius: 300px;
@@ -222,11 +222,13 @@ button:hover {
     font-style: normal;
 }
 
-#usuario:hover,#email:hover,#senha:hover,#nascimento:hover,#cpf:hover,#telefone:hover,#endereco:hover,#renda:hover {
+#usuario:hover,#email:hover,#senha:hover,#confirma_senha:hover,
+#nascimento:hover,#cpf:hover,#telefone:hover,#estado:hover,#endereco:hover,#renda:hover {
     transform: translateY(-5px); /* Efeito de elevação ao passar o mouse */
 }
 
-#usuario:active,#email:active,#senha:active {
+#usuario:active,#email:active,#senha:active,#confirma_senha:active,
+#nascimento:active,#cpf:active,#telefone:active,#estado:active,#endereco:active, #renda:active {
     color: rgb(238, 239, 238);
     background-color: rgb(178, 111, 230);
 }
@@ -249,6 +251,16 @@ button:hover {
     font-optical-sizing: auto;
     font-weight: 150;
     font-style: normal;
+}
+
+.botoes-centralizados {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-top: 20px;
+    text-align: center;
+    width: 100%;
 }
 
 /* Animação de fade-in */

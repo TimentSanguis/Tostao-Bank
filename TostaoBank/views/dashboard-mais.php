@@ -7,36 +7,31 @@ if (!isset($_SESSION['usuario'])) {
     exit;
 }
 
-// Acessa as informações da sessão
+// Acessa as informações da sessão (dados vindos da API no login)
 $nome_usuario = htmlspecialchars($_SESSION['usuario'], ENT_QUOTES, 'UTF-8');
 $saldo_usuario = number_format($_SESSION['saldo'], 2, ',', '.');
 $email_usuario = htmlspecialchars($_SESSION['email'], ENT_QUOTES, 'UTF-8');
-$telefone_usuario = $_SESSION['telefone'];
-$num_cartao = isset($_SESSION['num_cartao']) ? $_SESSION['num_cartao'] : "Número de cartão não disponível";
-$num_formatado = preg_replace('/(\d{4})/', '$1   ', $num_cartao); // Divide em blocos de 4 separados por espaço
+$telefone_usuario = $_SESSION['telefone'] ?? null;
+$num_cartao = $_SESSION['num_cartao'] ?? "Número de cartão não disponível";
+$num_formatado = preg_replace('/(\d{4})/', '$1   ', $num_cartao); // Formata em blocos de 4 dígitos
 
-
-// Aqui você pode formatar o telefone, se necessário. Exemplo de formatação simples:
-$telefone_formatado = preg_replace('/(\d{2})(\d{5})(\d{4})/', '($1) $2-$3', $telefone_usuario);
-
-if (isset($_SESSION['telefone'])) {
-    $telefone_usuario = $_SESSION['telefone'];
+// Formata telefone, se disponível
+if ($telefone_usuario) {
     $telefone_formatado = preg_replace('/(\d{2})(\d{5})(\d{4})/', '($1) $2-$3', $telefone_usuario);
 } else {
-    $telefone_formatado = 'Telefone não disponível';  // Ou algum outro valor padrão
+    $telefone_formatado = 'Telefone não disponível';
 }
 
+// Tratamento para logout via POST
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Destrói todas as variáveis de sessão e redireciona para a página inicial
     session_destroy();
     header("Location: index.html");
     exit();
 }
-
 ?>
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
   <head>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
@@ -160,8 +155,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </div>
                         <div class="card-exp-cvv">
                           <p>
-                            <span style="float: left">exp: 2024/07</span
-                            ><span style="float: right">cvv2: 999</span>
+                            <span style="float: left">exp: 2038/07</span
+                            ><span style="float: right">cvv: 999</span>
                           </p>
                         </div>
                       </div>
@@ -197,6 +192,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                               <div class="text"><p>Caixinha</p></div>
                             </div>
                           </div>
+                          
+                          <!--Botão de Seguros-->
+                        <div class="option" onclick="window.location.href='dashboard-seguros.php'">
+                          <div class="container">
+                            <div class="logo">
+                              <img src="../resources/files/pics/seguros.svg" alt=""/>
+                            </div>
+                            <div class="text"><p>Seguros</p></div>
+                          </div>
+                        </div>
+
                           <div
                             class="option"
                             onclick="window.location.href='dashboard-recarga.php'"

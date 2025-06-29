@@ -1,49 +1,62 @@
 <?php
 session_start(); // Inicia a sessão
-include('php/conexao.php');
 
 // Verifica se o usuário está logado
 if (!isset($_SESSION['usuario'])) {
-    header("Location: login.php"); // Redireciona para o login se não estiver logado
+    header("Location: login.php");
     exit;
 }
 
-// Acessa as informações da sessão
-$nome_usuario = htmlspecialchars($_SESSION['usuario'], ENT_QUOTES, 'UTF-8');
-$saldo_usuario = number_format($_SESSION['saldo'], 2, ',', '.');
-$email_usuario = htmlspecialchars($_SESSION['email'], ENT_QUOTES, 'UTF-8');
-$telefone_usuario = $_SESSION['telefone'];
-$num_cartao = isset($_SESSION['num_cartao']) ? $_SESSION['num_cartao'] : "Número de cartão não disponível";
-$num_formatado = preg_replace('/(\d{4})/', '$1   ', $num_cartao); // Divide em blocos de 4 separados por espaço
+if (isset($_GET['logout'])) {
+  session_destroy();
+  header("Location: index.html");
+  exit;
+}
 
-// Formatação do telefone, se necessário
-$telefone_formatado = preg_replace('/(\d{2})(\d{5})(\d{4})/', '($1) $2-$3', $telefone_usuario);
+$email_sessao = $_SESSION['email'];
 
-// Buscar transações do usuário logado
-$query = "SELECT * FROM historico WHERE email_recebe_Transferencia = '$email_usuario' OR email_Transferencia = '$email_usuario' ORDER BY data_Transferencia DESC";
-$result = mysqli_query($conecta_db, $query);
+// URL base da API
+$apiBaseUrlUsuario = 'http://localhost:8080/tostao';//Conexão API
+$apiBaseUrlHistorico = 'http://localhost:8080/historico';
 
-// Verificar se há transações
-$transacoes = mysqli_num_rows($result) > 0 ? mysqli_fetch_all($result, MYSQLI_ASSOC) : null;
+// Função para fazer requisição GET via cURL
+function apiGetRequest($url) {
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+    $response = curl_exec($ch);
+    if (curl_errno($ch)) {
+        // Em caso de erro, pode tratar aqui
+        curl_close($ch);
+        return false;
+    }
+    curl_close($ch);
+    return json_decode($response, true);
+}
 
- $nome_usuario = $_SESSION['usuario'];
- $cliente_id = $_SESSION['id'];
-  // Consulta o saldo atualizado do usuário
- $sql = "SELECT saldo_usuario FROM usuario WHERE id_usuario = ?";
- $stmt = $conecta_db->prepare($sql);
- $stmt->bind_param("i", $cliente_id);
- $stmt->execute();
- $result = $stmt->get_result();
+// Buscar dados do usuário via API
+$userData = apiGetRequest($apiBaseUrlUsuario . "/usuario?email=" . urlencode($email_sessao));
+$transacoes = apiGetRequest($apiBaseUrlHistorico . "/transferencias?email=" . urlencode($email_sessao));
 
- if ($result->num_rows > 0) {
-     $row = $result->fetch_assoc();
-     $saldo_usuario = number_format($row['saldo_usuario'],2,',','.');
- } else {
-     echo "Usuário não encontrado.";
-     exit;
- }
+if (!$userData) {
+    die("Erro ao buscar dados do usuário na API");
+}
 
- $stmt->close();
+$nome_usuario = isset($userData['nomeUsuario']) ? htmlspecialchars($userData['nomeUsuario'], ENT_QUOTES, 'UTF-8') : 'Usuário';
+$saldo_usuario = isset($userData['saldoUsuario']) && is_numeric($userData['saldoUsuario'])? number_format($userData['saldoUsuario'], 2, ',', '.'): '0,00';
+$email_usuario = isset($userData['emailUsuario']) ? htmlspecialchars($userData['emailUsuario'], ENT_QUOTES, 'UTF-8') : '';
+$telefone_usuario = isset($userData['telefoneUsuario']) ? (string)$userData['telefoneUsuario'] : '';
+$num_cartao = isset($userData['cartaoUsuario']) ? (string)$userData['cartaoUsuario'] : "Número de cartão não disponível";
+$num_formatado = preg_replace('/(\d{4})/', '$1   ', $num_cartao);
+
+// Formatar telefone se estiver presente
+if ($telefone_usuario) {
+    $telefone_formatado = preg_replace('/(\d{2})(\d{5})(\d{4})/', '($1) $2-$3', $telefone_usuario);
+} else {
+    $telefone_formatado = '';
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -87,17 +100,17 @@ $transacoes = mysqli_num_rows($result) > 0 ? mysqli_fetch_all($result, MYSQLI_AS
                             </div>
                             <div class="balance-container">
                                 <div class="balance-text">
-                                    <p><span>Seu Saldo:</span></p>
-                                    <p>
-                                        <span class="money"><?php echo $saldo_usuario; ?>
-                                            <span style="color: green; font-size: 50px">$</span>
+                                    <p><span>Seus Trocados:</span></p>
+                                      <p>
+                                        <span class="money">
+                                          <span><span style="color: green; font-size: 25px">R$ </span><?php echo $saldo_usuario; ?></span>
                                         </span>
-                                    </p>
+                                      </p>
                                 </div>
                             </div>
                             <div class="account-info">
                                 <div class="info-text">
-                                    <p style="margin-bottom: 10px"><span style="font-size: 20px">Dados Conta</span></p>
+                                    <p style="margin-bottom: 10px"><span style="font-size: 20px">Dados do Pobre</span></p>
                                     <p><span>Email: <?php echo $email_usuario; ?></span></p>
                                     <p><span>Celular: <?php echo $telefone_formatado; ?></span></p>
                                 </div>
@@ -106,114 +119,114 @@ $transacoes = mysqli_num_rows($result) > 0 ? mysqli_fetch_all($result, MYSQLI_AS
                     </div>
                     <!--Coluna do Meio-->
                     <div class="column-middle">
-    <section>
-        <div class="transaction">
-            <div class="trans-container">
-                <div class="title">
-                    <p><span>Histórico</span></p>
-                </div>
-                <div class="trans-info">
-                    <div class="history">
-                        <?php if ($transacoes): ?>
-                            <?php foreach ($transacoes as $transacao): ?>
-                                <?php if ($transacao['email_recebe_Transferencia'] == $email_usuario): ?>
-                                    <!-- Transação recebida -->
-                                    <div class="element">
-                                        <p>
-                                            <span class="reason"><?php echo $transacao['tipo_Transferencia']; ?></span>
-                                            <span class="flash">
-                                                <?php if ($transacao['tipo_Transferencia'] == 'Pix'): ?>
-                                                    <img src="../resources/files/pics/down.svg" alt="Recebido" />
-                                                <?php elseif (stripos($transacao['desc_transferencia'], 'Retirada') !== false): ?>
-                                                    <img src="../resources/files/pics/down.svg" alt="Retirada de Investimentos" />
-                                                <?php elseif ($transacao['tipo_Transferencia'] == 'Recarga'): ?>
-                                                    <img src="../resources/files/pics/up.svg" alt="Recarga" />
+                    <section>
+                        <div class="transaction">
+                            <div class="trans-container">
+                                <div class="title">
+                                    <p><span>Histórico</span></p>
+                                </div>
+                                <div class="trans-info">
+                                    <div class="history">
+                                        <?php if ($transacoes): ?>
+                                            <?php foreach ($transacoes as $transacao): ?>
+                                                <?php if ($transacao['emailRecebeTransferencia'] == $email_usuario): ?>
+                                                    <!-- Transação recebida -->
+                                                    <div class="element">
+                                                        <p>
+                                                            <span class="reason"><?php echo $transacao['tipoTransferencia']; ?></span>
+                                                            <span class="flash">
+                                                                <?php if ($transacao['tipoTransferencia'] == 'Pix'): ?>
+                                                                    <img src="../resources/files/pics/down.svg" alt="Recebido" />
+                                                                <?php elseif (stripos($transacao['descTransferencia'], 'Retirada') !== false): ?>
+                                                                    <img src="../resources/files/pics/down.svg" alt="Retirada de Investimentos" />
+                                                                <?php elseif ($transacao['tipoTransferencia'] == 'Recarga'): ?>
+                                                                    <img src="../resources/files/pics/up.svg" alt="Recarga" />
+                                                                <?php endif; ?>
+                                                            </span>
+                                                        </p>
+                                                        <?php if ($transacao['tipoTransferencia'] == 'Pix'): ?>
+                                                            <p>
+                                                                <span class="details">Enviado por: <?php echo $transacao['emailTransferencia']; ?></span>
+                                                            </p>
+                                                        <?php elseif (stripos($transacao['desctransferencia'], 'Retirada') !== false): ?>
+                                                            <p>
+                                                                <span class="details">Retirada de Investimentos</span>
+                                                            </p>
+                                                        <?php elseif ($transacao['tipoTransferencia'] == 'Recarga'): ?>
+                                                            <p>
+                                                                <span class="details">Recarga realizada</span>
+                                                            </p>
+                                                        <?php endif; ?>
+                                                        <p>
+                                                            <span class="date"><?php echo date("d/m/Y", strtotime($transacao['dataTransferencia'])); ?></span>
+                                                            <span class="money">
+                                                                <?php echo number_format($transacao['valorTransferencia'], 2, ',', '.'); ?>
+                                                                <?php
+                                                                // Mudando a cor do $ para verde nas transações de Retirada ou Pix recebido
+                                                                if ($transacao['tipoTransferencia'] == 'Pix' || stripos($transacao['descTransferencia'], 'Retirada') !== false) {
+                                                                    echo '<span style="color: green;">R$</span>';
+                                                                } else {
+                                                                    echo '<span style="color: red;">R$</span>';
+                                                                }
+                                                                ?>
+                                                            </span>
+                                                        </p>
+                                                        <hr />
+                                                    </div>
+                                                <?php elseif ($transacao['emailTransferencia'] == $email_usuario): ?>
+                                                    <!-- Transação enviada -->
+                                                    <div class="element">
+                                                        <p>
+                                                            <span class="reason"><?php echo $transacao['tipoTransferencia']; ?></span>
+                                                            <span class="flash">
+                                                                <?php if ($transacao['tipoTransferencia'] == 'Pix'): ?>
+                                                                    <img src="../resources/files/pics/up.svg" alt="Enviado" />
+                                                                <?php elseif (stripos($transacao['descTransferencia'], 'Investido') !== false): ?>
+                                                                    <img src="../resources/files/pics/up.svg" alt="Investido em Investimentos" />
+                                                                <?php elseif (stripos($transacao['descTransferencia'], 'Retirada') !== false): ?>
+                                                                    <img src="../resources/files/pics/down.svg" alt="Retirada de Investimentos" />
+                                                                <?php elseif ($transacao['tipoTransferencia'] == 'Recarga'): ?>
+                                                                    <img src="../resources/files/pics/up.svg" alt="Recarga" />
+                                                                <?php endif; ?>
+                                                            </span>
+                                                        </p>
+                                                        <?php if ($transacao['tipoTransferencia'] == 'Pix'): ?>
+                                                            <p>
+                                                                <span class="details">Enviado para: <?php echo $transacao['emailRecebeTransferencia']; ?></span>
+                                                            </p>
+                                                        <?php elseif (stripos($transacao['descTransferencia'], 'Investido') !== false): ?>
+                                                            <p>
+                                                                <span class="details">Investido em Investimentos</span>
+                                                            </p>
+                                                        <?php elseif (stripos($transacao['descTransferencia'], 'Retirada') !== false): ?>
+                                                            <p>
+                                                                <span class="details">Retirada de Investimentos</span>
+                                                            </p>
+                                                        <?php elseif ($transacao['tipoTransferencia'] == 'Recarga'): ?>
+                                                            <p>
+                                                                <span class="details">Recarga realizada</span>
+                                                            </p>
+                                                        <?php endif; ?>
+                                                        <p>
+                                                            <span class="date"><?php echo date("d/m/Y", strtotime($transacao['dataTransferencia'])); ?></span>
+                                                            <span class="money">
+                                                                <?php echo number_format($transacao['valorTransferencia'], 2, ',', '.'); ?>
+                                                                <span style="color: red;">R$</span>
+                                                            </span>
+                                                        </p>
+                                                        <hr />
+                                                    </div>
                                                 <?php endif; ?>
-                                            </span>
-                                        </p>
-                                        <?php if ($transacao['tipo_Transferencia'] == 'Pix'): ?>
-                                            <p>
-                                                <span class="details">Enviado por: <?php echo $transacao['email_Transferencia']; ?></span>
-                                            </p>
-                                        <?php elseif (stripos($transacao['desc_transferencia'], 'Retirada') !== false): ?>
-                                            <p>
-                                                <span class="details">Retirada de Investimentos</span>
-                                            </p>
-                                        <?php elseif ($transacao['tipo_Transferencia'] == 'Recarga'): ?>
-                                            <p>
-                                                <span class="details">Recarga realizada</span>
-                                            </p>
+                                            <?php endforeach; ?>
+                                        <?php else: ?>
+                                            <p>Nenhuma transação encontrada.</p>
                                         <?php endif; ?>
-                                        <p>
-                                            <span class="date"><?php echo date("d/m/Y", strtotime($transacao['data_Transferencia'])); ?></span>
-                                            <span class="money">
-                                                <?php echo number_format($transacao['valor_Transferencia'], 2, ',', '.'); ?>
-                                                <?php
-                                                // Mudando a cor do $ para verde nas transações de Retirada ou Pix recebido
-                                                if ($transacao['tipo_Transferencia'] == 'Pix' || stripos($transacao['desc_transferencia'], 'Retirada') !== false) {
-                                                    echo '<span style="color: green;">R$</span>';
-                                                } else {
-                                                    echo '<span style="color: red;">R$</span>';
-                                                }
-                                                ?>
-                                            </span>
-                                        </p>
-                                        <hr />
                                     </div>
-                                <?php elseif ($transacao['email_Transferencia'] == $email_usuario): ?>
-                                    <!-- Transação enviada -->
-                                    <div class="element">
-                                        <p>
-                                            <span class="reason"><?php echo $transacao['tipo_Transferencia']; ?></span>
-                                            <span class="flash">
-                                                <?php if ($transacao['tipo_Transferencia'] == 'Pix'): ?>
-                                                    <img src="../resources/files/pics/up.svg" alt="Enviado" />
-                                                <?php elseif (stripos($transacao['desc_transferencia'], 'Investido') !== false): ?>
-                                                    <img src="../resources/files/pics/up.svg" alt="Investido em Investimentos" />
-                                                <?php elseif (stripos($transacao['desc_transferencia'], 'Retirada') !== false): ?>
-                                                    <img src="../resources/files/pics/down.svg" alt="Retirada de Investimentos" />
-                                                <?php elseif ($transacao['tipo_Transferencia'] == 'Recarga'): ?>
-                                                    <img src="../resources/files/pics/up.svg" alt="Recarga" />
-                                                <?php endif; ?>
-                                            </span>
-                                        </p>
-                                        <?php if ($transacao['tipo_Transferencia'] == 'Pix'): ?>
-                                            <p>
-                                                <span class="details">Enviado para: <?php echo $transacao['email_recebe_Transferencia']; ?></span>
-                                            </p>
-                                        <?php elseif (stripos($transacao['desc_transferencia'], 'Investido') !== false): ?>
-                                            <p>
-                                                <span class="details">Investido em Investimentos</span>
-                                            </p>
-                                        <?php elseif (stripos($transacao['desc_transferencia'], 'Retirada') !== false): ?>
-                                            <p>
-                                                <span class="details">Retirada de Investimentos</span>
-                                            </p>
-                                        <?php elseif ($transacao['tipo_Transferencia'] == 'Recarga'): ?>
-                                            <p>
-                                                <span class="details">Recarga realizada</span>
-                                            </p>
-                                        <?php endif; ?>
-                                        <p>
-                                            <span class="date"><?php echo date("d/m/Y", strtotime($transacao['data_Transferencia'])); ?></span>
-                                            <span class="money">
-                                                <?php echo number_format($transacao['valor_Transferencia'], 2, ',', '.'); ?>
-                                                <span style="color: red;">R$</span>
-                                            </span>
-                                        </p>
-                                        <hr />
-                                    </div>
-                                <?php endif; ?>
-                            <?php endforeach; ?>
-                        <?php else: ?>
-                            <p>Nenhuma transação encontrada.</p>
-                        <?php endif; ?>
-                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
                 </div>
-            </div>
-        </div>
-    </section>
-</div>
 
               <!--Coluna da Direita-->
               <div class="column-right">
@@ -239,8 +252,8 @@ $transacoes = mysqli_num_rows($result) > 0 ? mysqli_fetch_all($result, MYSQLI_AS
                         </div>
                         <div class="card-exp-cvv">
                           <p>
-                            <span style="float: left">exp: 2024/07</span
-                            ><span style="float: right">cvv2: 999</span>
+                            <span style="float: left">exp: 2038/07</span
+                            ><span style="float: right">cvv: 999</span>
                           </p>
                         </div>
                       </div>
@@ -267,6 +280,16 @@ $transacoes = mysqli_num_rows($result) > 0 ? mysqli_fetch_all($result, MYSQLI_AS
                               <div class="text"><p>Caixinha</p></div>
                             </div>
                           </div>
+
+                          <div class="option" onclick="window.location.href='dashboard-seguros.php'">
+                          <div class="container">
+                            <div class="logo">
+                              <img src="../resources/files/pics/seguros.svg" alt=""/>
+                            </div>
+                            <div class="text"><p>Seguros</p></div>
+                          </div>
+                        </div>
+                        
                           <div class="option" onclick="window.location.href='dashboard-recarga.php'">
                             <div class="container">
                               <div class="logo">
@@ -302,13 +325,13 @@ $transacoes = mysqli_num_rows($result) > 0 ? mysqli_fetch_all($result, MYSQLI_AS
                               <div class="text"><p>Desativar conta</p></div>
                             </div>
                           </div>
-                          <div class="option" onclick="window.location.href='index.html'">
-                            <div class="container">
-                              <div class="logo">
-                                <img src="../resources/files/pics/more.svg" alt="">
+                          <div class="option" onclick="window.location.href='dashboard.php?logout=true'">
+                              <div class="container">
+                                  <div class="logo">
+                                      <img src="../resources/files/pics/more.svg" alt="">
+                                  </div>
+                                  <div class="text"><p>Sair</p></div>
                               </div>
-                              <div class="text"><p>Sair</p></div>
-                            </div>
                           </div>
                         </div>
                       </div>

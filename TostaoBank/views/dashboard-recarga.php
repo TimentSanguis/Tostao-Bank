@@ -1,57 +1,69 @@
 <?php
-include 'php/conexao.php';
+session_start();
 
-session_start(); // Inicia a sessão
-
-date_default_timezone_set('America/Sao_Paulo');
-
-// Verifica se o usuário está logado
-if (!isset($_SESSION['usuario'])) {
-    header("Location: login.php"); // Redireciona para o login se não estiver logado
+// Verifica se o usuário está logado e tem token
+if (!isset($_SESSION['usuario']) || !isset($_SESSION['token'])) {
+    header("Location: login.php");
     exit;
 }
 
-// Acessa as informações da sessão
-$nome_usuario = htmlspecialchars($_SESSION['usuario'], ENT_QUOTES, 'UTF-8');
-$saldo_usuario = number_format($_SESSION['saldo'], 2, ',', '.');
-$email_usuario = htmlspecialchars($_SESSION['email'], ENT_QUOTES, 'UTF-8');
-$telefone_usuario = $_SESSION['telefone'];
-$num_cartao = isset($_SESSION['num_cartao']) ? $_SESSION['num_cartao'] : "Número de cartão não disponível";
-$num_formatado = preg_replace('/(\d{4})/', '$1   ', $num_cartao); // Divide em blocos de 4 separados por espaço
-
-
-// Aqui você pode formatar o telefone, se necessário. Exemplo de formatação simples:
-$telefone_formatado = preg_replace('/(\d{2})(\d{5})(\d{4})/', '($1) $2-$3', $telefone_usuario);
-
-if (isset($_SESSION['telefone'])) {
-    $telefone_usuario = $_SESSION['telefone'];
-    $telefone_formatado = preg_replace('/(\d{2})(\d{5})(\d{4})/', '($1) $2-$3', $telefone_usuario);
-} else {
-    $telefone_formatado = 'Telefone não disponível';  // Ou algum outro valor padrão
+// Pega id do usuário da sessão
+$cliente_id = $_SESSION['id'] ?? null;
+if (!$cliente_id) {
+    echo "ID do usuário não encontrado na sessão.";
+    exit;
 }
 
- $nome_usuario = $_SESSION['usuario'];
- $cliente_id = $_SESSION['id'];
-  // Consulta o saldo atualizado do usuário
- $sql = "SELECT saldo_usuario FROM usuario WHERE id_usuario = ?";
- $stmt = $conecta_db->prepare($sql);
- $stmt->bind_param("i", $cliente_id);
- $stmt->execute();
- $result = $stmt->get_result();
+// Inicializa variáveis com dados da sessão (fallback)
+$nome_usuario = htmlspecialchars($_SESSION['nome'] ?? '', ENT_QUOTES, 'UTF-8');
+$email_usuario = htmlspecialchars($_SESSION['email'] ?? '', ENT_QUOTES, 'UTF-8');
+$telefone_usuario = $_SESSION['telefone'] ?? '';
+$num_cartao = $_SESSION['num_cartao'] ?? "Número de cartão não disponível";
+$saldo_usuario = number_format($_SESSION['saldo'] ?? 0, 2, ',', '.');
 
- if ($result->num_rows > 0) {
-     $row = $result->fetch_assoc();
-     $saldo_usuario = number_format($row['saldo_usuario'],2,',','.');
- } else {
-     echo "Usuário não encontrado.";
-     exit;
- }
+// Faz requisição à API para pegar dados atualizados
+$token = $_SESSION['token'];
+$apiUrl = "http://localhost:8080/tostao/usuario/$cliente_id";
 
- $stmt->close();
+$ch = curl_init($apiUrl);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_HTTPHEADER, [
+    "Authorization: Bearer $token",
+    "Content-Type: application/json"
+]);
+
+$response = curl_exec($ch);
+$httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+curl_close($ch);
+
+if ($httpcode == 200 && $response !== false) {
+    $dados = json_decode($response, true);
+
+    // Atualiza variáveis com dados da API, se existir
+    $nome_usuario = htmlspecialchars($dados['nomeUsuario'] ?? $nome_usuario, ENT_QUOTES, 'UTF-8');
+    $email_usuario = htmlspecialchars($dados['emailUsuario'] ?? $email_usuario, ENT_QUOTES, 'UTF-8');
+    $telefone_usuario = $dados['telefoneUsuario'] ?? $telefone_usuario;
+    $saldo_usuario = number_format($dados['saldoUsuario'] ?? 0, 2, ',', '.');
+    $num_cartao = isset($dados['cartaoUsuario']) ? (string)$dados['cartaoUsuario'] : $num_cartao;
+}
+
+// Formata número do cartão (grupos de 4 dígitos) ou mantém texto se inválido
+if (is_numeric($num_cartao)) {
+    $num_formatado = preg_replace('/(\d{4})(?=\d)/', '$1 ', $num_cartao);
+} else {
+    $num_formatado = $num_cartao;
+}
+
+// Formata telefone ou define texto padrão
+if (!empty($telefone_usuario)) {
+    $telefone_formatado = preg_replace('/(\d{2})(\d{5})(\d{4})/', '($1) $2-$3', $telefone_usuario);
+} else {
+    $telefone_formatado = 'Telefone não disponível';
+}
 ?>
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
   <head>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
@@ -108,17 +120,18 @@ if (isset($_SESSION['telefone'])) {
                 </div>
                 <div class="balance-container">
                   <div class="balance-text">
-                    <p><span>Seu Saldo:</span></p>
-                    <p>
-						<span id="saldoValue" class="money"><?php echo $saldo_usuario; ?> </span>
-						<span id="saldoValue" class="money" style="color: green; font-size: 50px">$</span>
-                    </p>
+                    <p><span>Seus Trocados:</span></p>
+                      <p>
+                        <span class="money">
+                          <span><span style="color: green; font-size: 25px">R$ </span><?php echo $saldo_usuario; ?></span>
+                        </span>
+                      </p>
                   </div>
                 </div>
                 <div class="account-info">
                   <div class="info-text">
                     <p style="margin-bottom: 10px">
-                      <span style="font-size: 20px">Dados Conta</span>
+                      <span style="font-size: 20px">Dados do Pobre</span>
                     </p>
                     <p><span>Email: <?php echo $email_usuario; ?></span></p>
                     <p><span>Celular: <?php echo $telefone_formatado; ?></span></p>
@@ -135,21 +148,22 @@ if (isset($_SESSION['telefone'])) {
                     </div>
                     <div class="trans-info">
                       <div class="container">
-                        <form id="pixForm">
-							<label for="amount">Valor</label>
-							<input type="text" id="charge" name="txt_valor" required />
-							<label for="Phone-num">Número de celular</label>
-							<input type="number" id="Phone-num" name="txt_numero" required />
-							<button type="submit">Recarga</button>
-						</form>
-						<div id="mensagem"></div>
+                        <form id="recargaForm">
+                          <label for="charge">Valor</label>
+                          <input type="text" id="charge" name="txt_valor" required />
+                          <label for="Phone-num">Número de celular</label>
+                          <input type="number" id="Phone-num" name="txt_numero" required />
+                          <button type="submit">Recarga</button>
+                        </form>
+                        <div id="mensagem"></div>
+                          <span id="saldoValue"></span>
                       </div>
-
                     </div>
                   </div>
                 </div>
               </section>
             </div>
+            
             <div class="column-right">
               <section>
                 <div class="card">
@@ -173,8 +187,8 @@ if (isset($_SESSION['telefone'])) {
                         </div>
                         <div class="card-exp-cvv">
                           <p>
-                            <span style="float: left">exp: 2024/07</span
-                            ><span style="float: right">cvv2: 999</span>
+                            <span style="float: left">exp: 2038/07</span
+                            ><span style="float: right">cvv: 999</span>
                           </p>
                         </div>
                       </div>
@@ -201,6 +215,17 @@ if (isset($_SESSION['telefone'])) {
                               <div class="text"><p>Caixinha</p></div>
                             </div>
                           </div>
+
+                          <!--Botão de Seguros-->
+                        <div class="option" onclick="window.location.href='dashboard-seguros.php'">
+                          <div class="container">
+                            <div class="logo">
+                              <img src="../resources/files/pics/seguros.svg" alt=""/>
+                            </div>
+                            <div class="text"><p>Seguros</p></div>
+                          </div>
+                        </div>
+                        
                           <div class="option" style="box-shadow: 0px 1px 15px rgba(0, 0, 0); /* add a light gray shadow */
                           transition: all 0.3s; background-color: #f4505083;">
                             <div class="container">
@@ -238,13 +263,13 @@ if (isset($_SESSION['telefone'])) {
                               <div class="text"><p>Desativar conta</p></div>
                             </div>
                           </div>
-                          <div class="option" onclick="window.location.href='index.html'">
-                            <div class="container">
-                              <div class="logo">
-                                <img src="../resources/files/pics/more.svg" alt="">
+                          <div class="option" onclick="window.location.href='dashboard.php?logout=true'">
+                              <div class="container">
+                                  <div class="logo">
+                                      <img src="../resources/files/pics/more.svg" alt="">
+                                  </div>
+                                  <div class="text"><p>Sair</p></div>
                               </div>
-                              <div class="text"><p>Sair</p></div>
-                            </div>
                           </div>
                         </div>
                       </div>
@@ -259,70 +284,87 @@ if (isset($_SESSION['telefone'])) {
     </main>
     <footer></footer>
     <script src="../resources/js/dashboard-js.js" defer></script>
-	<script>
-		function limitarDecimais(event) {
-        let valor = event.target.value;
-        let partes = valor.split(",");
-        if (partes.length === 2 && partes[1].length > 2) {
-            event.target.value = partes[0] + "," + partes[1].substring(0, 2);
-        }
+    <script>
+document.addEventListener("DOMContentLoaded", function() {
+  // Limita casas decimais no input do valor
+  const valorInput = document.getElementById('charge');
+  valorInput.addEventListener('input', function(event) {
+    let valor = event.target.value;
+    let partes = valor.split(",");
+    if (partes.length === 2 && partes[1].length > 2) {
+      event.target.value = partes[0] + "," + partes[1].substring(0, 2);
+    }
+  });
+
+  const form = document.getElementById('recargaForm');
+  const mensagemDiv = document.getElementById('mensagem');
+
+  form.addEventListener('submit', function(e) {
+    e.preventDefault();
+    mensagemDiv.textContent = ''; // limpa mensagem
+
+    // Pega dados do form e monta objeto JSON
+    const formData = new FormData(form);
+    const data = {};
+    formData.forEach((value, key) => {
+      if (key === 'txt_valor') {
+        value = value.replace(',', '.'); // troca vírgula por ponto decimal
+      }
+      data[key] = value;
+    });
+
+    // Pega email do PHP (usuário logado)
+    const emailUsuario = '<?php echo $email_usuario; ?>';
+
+    // Monta objeto para enviar
+    const bodyJson = {
+      email: emailUsuario,
+      valor: parseFloat(data['txt_valor']),
+      telefone: data['txt_numero']
+    };
+
+    // Valida valor para evitar envio inválido
+    if (isNaN(bodyJson.valor) || bodyJson.valor <= 0) {
+      mensagemDiv.style.color = 'red';
+      mensagemDiv.textContent = 'Por favor, insira um valor válido para recarga.';
+      return;
     }
 
-    document.addEventListener("DOMContentLoaded", function() {
-        const toggleSaldoButton = document.getElementById('toggleSaldo');
-        const saldoDisplay = document.getElementById('saldoDisplay');
-        const saldoValue = document.getElementById('saldoValue');
+    fetch('http://localhost:8080/tostao/recarga', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(bodyJson)
+    })
+    .then(async response => {
+      if (!response.ok) {
+        const text = await response.text();
+        throw new Error('Erro na resposta da API: ' + response.status + ' - ' + text);
+      }
+      return response.json();
+    })
+    .then(data => {
+      console.log('Recarga efetuada:', data);
+      mensagemDiv.style.color = 'green';
+      mensagemDiv.textContent = 'Recarga efetuada com sucesso!';
+      window.location.href = 'confirmado.html';
 
-        document.getElementById('pixForm').addEventListener('submit', function(e) {
-            e.preventDefault(); // Impede o envio normal do formulário
+      // Atualiza saldo na tela
+      const saldoEl = document.getElementById('saldoValue');
+      if (saldoEl && data.saldoUsuario !== undefined) {
+        // Formata saldo para BRL
+        saldoEl.textContent = data.saldoUsuario.toFixed(2).replace('.', ',');
+      }
 
-            const formData = new FormData(this);
-            fetch('recarga_ajax.php', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                // Atualiza a mensagem na página
-                document.getElementById('mensagem').innerHTML = data.mensagem;
-				window.location.href = 'confirmado.html';
-
-                // Atualiza o saldo na tela se a transferência for bem-sucedida
-                if (data.saldo) {
-                    saldoValue.innerHTML = data.saldo;
-                    saldoDisplay.innerHTML = `Seu saldo: R$ ${data.saldo}`;	
-                }
-            })
-            .catch(error => {
-                console.error('Erro:', error);
-				});
-			});
-
-			// Função para atualizar o saldo via AJAX
-			function atualizarSaldo() {
-				fetch('php/obter_saldo.php')
-					.then(response => {
-						if (!response.ok) {
-							throw new Error('Network response was not ok');
-						}
-						return response.json();
-					})
-					.then(data => {
-						if (data.saldo) {
-							saldoValue.innerHTML = data.saldo;
-							saldoDisplay.innerHTML = `Seu saldo: R$ ${data.saldo}`;
-						} else if (data.erro) {
-							console.error(data.erro);
-						}
-					})
-					.catch(error => {
-						console.error('Erro:', error);
-					});
-			}
-
-			// Chama a função para atualizar o saldo periodicamente (a cada 10 segundos)
-			setInterval(atualizarSaldo, 10000);
-		});
-		</script>
+      // Limpa o formulário
+      form.reset();
+    })
+    .catch(error => {
+      console.error('Erro capturado:', error);
+      mensagemDiv.style.color = 'red';
+      mensagemDiv.textContent = error.message;
+    });
+  });
+});
+</script>
   </body>
 </html>
