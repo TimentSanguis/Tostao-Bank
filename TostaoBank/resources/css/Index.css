@@ -363,7 +363,7 @@ header{
 .texto-section4 {
     text-align: justify;
     background-color: var(--text-light);
-    color: var(--text-light);
+    color: black;
     font-family: var(--font-body);
     font-size: 4vh;
     font-weight: lighter;
